@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "core-js": "^3.4.4",
-    "vue": "^2.6.10"
+    "materialize-css": "^1.0.0",
+    "vue": "^2.6.10",
+    "vue-plotly": "^1.0.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.1.0",
@@ -29,7 +31,10 @@
       "plugin:vue/essential",
       "eslint:recommended"
     ],
-    "rules": {},
+    "rules": {
+      "no-unused-vars": "warn",
+      "vue/no-unused-vars": "warn"
+    },
     "parserOptions": {
       "parser": "babel-eslint"
     }
