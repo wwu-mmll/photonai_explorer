@@ -3,68 +3,36 @@
     <h1>Investigator UI</h1>
     <FileAcceptor :files="files"></FileAcceptor>
     <br />
-    <h3>Active files</h3>
-    <ul>
-      <li v-for="(file, index) in files" :key="index">
-        {{ index }}. {{ file.name }}
-        <button @click="removeFile(file)" title="Button">Remove file</button>
-      </li>
-    </ul>
-    <br />
-    <h3>Plots</h3>
-    <div class="row">
-      <Plot class="col s5" :key="index" :data="data['data']" :layout="data['layout']" v-for="(data, index) in plotData" ></Plot>
-      <!--<div class="col s6" v-for="(index, val) in [1,2,3]" :key="index">{{ val }}</div>-->
+    <div v-if="this.files.length > 0">
+      <h3>Active analyses ({{ this.files.length }})</h3>
+      <ul>
+        <li v-for="(file, index) in files" :key="index">
+          <Visualisation :file="file"></Visualisation>
+          <button @click="removeFile(file)" title="Button">Remove entry</button>
+        </li>
+      </ul>
     </div>
+    <div v-else>
+      <h3>Drag a .json file into the box above to begin.</h3>
+    </div>
+
+    <!-- <Visualisation :file="file" v-for="(file, index) in files" :key="index"></Visualisation> -->
   </div>
 </template>
 
 <script>
-import FileAcceptor from "./components/FileAcceptor.vue";
-import Plot from "./components/Plot.vue";
+import FileAcceptor from "./components/FileAcceptor";
+import Visualisation from "./components/Visualisation";
 
 export default {
   name: "app",
   components: {
-    FileAcceptor,
-    Plot
+    Visualisation,
+    FileAcceptor
   },
   data() {
     return {
-      files: [],
-      plotData: [
-        {
-          data: [{
-            x: [1, 2, 3, 4, 5],
-            y: [2, 4, 6, 8, 10],
-            type: "scatter",
-            mode: "markers"
-          }],
-          layout: {
-            title: "My graph scatter"
-          }
-        },
-        {
-          data: [{
-            x: [1, 2, 3, 4, 5],
-            y: [2, 4, 6, 8, 10],
-            type: "scatter"
-          }],
-          layout: {
-            title: "My graph line"
-          }
-        },
-        {
-          data: [{
-            x: [1, 2, 3, 4, 5],
-            y: [99, 4, -10, 8, 10],
-            type: "scatter"
-          }],
-          layout: {
-            title: "My graph third"
-          }
-        },
-      ]
+      files: []
     };
   },
   methods: {

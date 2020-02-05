@@ -1,4 +1,4 @@
-export default {
+export {
   PlotlyPlot, 
   PlotlyTrace
 }
@@ -24,7 +24,7 @@ class PlotlyPlot {
 
   toPlot() {
     return {
-      data: this.traces,
+      data: this.traces.map(trace => trace.toTrace(false)),
       layout: {
         title: this.title,
         yaxis: {range: [-.25, 1.25]}

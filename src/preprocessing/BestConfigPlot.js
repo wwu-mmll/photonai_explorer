@@ -1,4 +1,4 @@
-export default {
+export {
   BestConfigPlot,
   BestConfigTrace
 }
@@ -57,11 +57,11 @@ class BestConfigTrace {
    */
   toTrace() {
     let r = {}
-    r['traceName'] = this.traceName
-    r['traceMode'] = this.traceMode
-    r['traceType'] = this.traceType
-    r['x'] = this.metricList.forEach(item => item['key'])
-    r['y'] = this.metricList.forEach(item => item['value'])
+    r['name'] = this.traceName
+    r['mode'] = this.traceMode
+    r['type'] = this.traceType
+    r['x'] = this.metricList.map(item => item['key'])
+    r['y'] = this.metricList.map(item => item['value'])
 
     return r
   }

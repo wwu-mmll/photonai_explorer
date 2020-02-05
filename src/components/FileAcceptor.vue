@@ -7,7 +7,7 @@
       @dragover.prevent
     >
       <span class="white-text flow-text">
-        Drag your pickle over here, sap!
+        I eat your files! NomNomNom
       </span>
     </div>
   </div>
