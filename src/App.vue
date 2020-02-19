@@ -13,10 +13,9 @@
       </ul>
     </div>
     <div v-else>
-      <h3>Drag a .json file into the box above to begin.</h3>
+      <h3>Drag a suitable .json file into the box above to begin.</h3>
     </div>
 
-    <!-- <Visualisation :file="file" v-for="(file, index) in files" :key="index"></Visualisation> -->
   </div>
 </template>
 

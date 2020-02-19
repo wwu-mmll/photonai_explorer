@@ -25,7 +25,7 @@ class BestConfigPlot {
   toPlot() {
     let r = {}
     r['data'] = [this.bestConfigTraining.toTrace(), this.bestConfigValidation.toTrace()]
-    r['layout'] = {title: this.plotName, yaxis: {range: [-.25, 1.25]}}
+    r['layout'] = {title: this.title} // , yaxis: {range: [-.25, 1.25]}
 
     return r
   }

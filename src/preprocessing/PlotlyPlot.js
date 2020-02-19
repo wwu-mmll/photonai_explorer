@@ -13,7 +13,7 @@ class PlotlyPlot {
    * Create new PlotlyPlot.
    * @param {String} title Title displayed above plot.
    * @param {*} traces 
-   * @param {*} showLegend 
+   * @param {Boolean} showLegend 
    */
   constructor(title, traces = [], showLegend = true) {
     this.title = title
@@ -24,10 +24,11 @@ class PlotlyPlot {
 
   toPlot() {
     return {
-      data: this.traces.map(trace => trace.toTrace(false)),
+      data: this.traces.map(trace => trace.toTrace(true)),
       layout: {
         title: this.title,
-        yaxis: {range: [-.25, 1.25]}
+        //yaxis: {range: [-.25, 1.25]},
+        showlegend: this.showLegend
       }
     }
   }
