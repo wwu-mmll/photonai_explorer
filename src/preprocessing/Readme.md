@@ -3,15 +3,14 @@
 For indicating what type of plot data is needed the enumeration-like object `PlotTypes`, exported by `plotCreation.js` can be used.
 In addition to the type some plots require additional data. The table below shows more details on who needs what:
 
-| Plot Type        | `foldNo` | `configIndex` |
-| :--------------- | :------: | ------------: |
-| `showPipeline`   |    N     |        N      |
-| `showOuterFold`  |    Y     |        N      |
-| `compareConfigs` |    Y     |        N      |
-| `testedConfig`   |    Y     |        Y      |
-| `config`         |    Y     |        Y      |  
+| Plot Type        | `foldNo` | `innerFoldNo` | `configIndex` |
+| :--------------- | :------: | :-----------: | ------------: |
+| `showPipeline`   |    N     |       N       |        N      |
+| `showOuterFold`  |    Y     |       N       |        N      |
+| `compareConfigs` |    Y     |       N       |        N      |
+| `testedConfig`   |    Y     |       Y       |        Y      |
+| `innerFoldConfig`|    Y     |       N       |        Y      |  
 
-At the time of this commit only `showPipeline` is implemented.
 
 ## Exampe usage
 

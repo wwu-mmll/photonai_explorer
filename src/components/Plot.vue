@@ -23,7 +23,7 @@ export default {
   methods: {
     // param: 'data' or 'layout' 
     getPlotData(neededType) {
-      window.console.log('gePlotData: entry')
+      //window.console.log('gePlotData: entry')
       let r = {}
       if (neededType == 'data')
         //r = this.unpackedData != {} ? this.unpackedData.data : this.unpackedData.data = this.plotData.toPlot().data;
@@ -31,7 +31,7 @@ export default {
       else if (neededType == 'layout')
         //r = this.unpackedData != {} ? this.unpackedData.layout : this.unpackedData.layout = this.plotData.toPlot().layout;
         r = this.plotData.toPlot().layout
-      window.console.log(r)
+      //window.console.log(r)
       if (r == {})
         alert(`Error in Plot.vue::generatePlotData - value for parameter neededType unknown: ${neededType}`)
       return r
