@@ -70,16 +70,17 @@ function plotShowPipeline(file) {
   let testingMetrics = {};
   let bestConfigPlots = [];
 
-  let overviewPlot = new PlotlyPlot("Overview Plot", [], false);
+  let overviewPlotTraining = new PlotlyPlot("Training", [], false);
+  let overviewPlotTesting = new PlotlyPlot('Testing', [], false);
 
   file.outer_folds.forEach(fold => {
     let overviewPlotTrainingTrace = new PlotlyTrace(
-      `Fold ${fold.fold_nr} (Training)`,
+      `Fold ${fold.fold_nr}`,
       ...Array(3).fill(undefined),
       "rgb(91,91,91)"
     );
     let overviewPlotTestingTrace = new PlotlyTrace(
-      `Fold ${fold.fold_nr} (Testing)`,
+      `Fold ${fold.fold_nr}`,
       ...Array(3).fill(undefined),
       "rgb(91,91,91)"
     );
@@ -87,7 +88,7 @@ function plotShowPipeline(file) {
     for (const [key, value] of Object.entries(
       fold.best_config.inner_folds[defaultBestConfigFold].training.metrics
     )) {
-      overviewPlotTrainingTrace.x.push(key + "_training");
+      overviewPlotTrainingTrace.x.push(key);
       overviewPlotTrainingTrace.y.push(value);
       trainingMetrics[key] = value;
     }
@@ -95,13 +96,13 @@ function plotShowPipeline(file) {
     for (const [key, value] of Object.entries(
       fold.best_config.inner_folds[defaultBestConfigFold].validation.metrics
     )) {
-      overviewPlotTestingTrace.x.push(key + "_testing");
+      overviewPlotTestingTrace.x.push(key);
       overviewPlotTestingTrace.y.push(value);
       testingMetrics[key] = value;
     }
 
-    overviewPlot.traces.push(overviewPlotTrainingTrace);
-    overviewPlot.traces.push(overviewPlotTestingTrace);
+    overviewPlotTraining.traces.push(overviewPlotTrainingTrace);
+    overviewPlotTesting.traces.push(overviewPlotTestingTrace);
 
     let metricTrainingTrace = new BestConfigTrace(
       "Training",
@@ -129,7 +130,7 @@ function plotShowPipeline(file) {
   let trainingMeanTrace = new PlotlyTrace(
     "mean_training",
     undefined,
-    undefined,
+    'bar',
     8,
     "rgb(214, 123, 25)",
     undefined
@@ -137,7 +138,7 @@ function plotShowPipeline(file) {
   let testingMeanTrace = new PlotlyTrace(
     "mean_testing",
     undefined,
-    undefined,
+    'bar',
     8,
     "rgb(214, 123, 25)",
     undefined
@@ -154,7 +155,7 @@ function plotShowPipeline(file) {
   }
 
   for (let [key, value] of Object.entries(temp)) {
-    trainingMeanTrace.x.push(`${key}_training`);
+    trainingMeanTrace.x.push(key);
     trainingMeanTrace.y.push(value / count[key]);
   }
 
@@ -170,15 +171,15 @@ function plotShowPipeline(file) {
   }
 
   for (let [key, value] of Object.entries(temp)) {
-    testingMeanTrace.x.push(`${key}_testing`);
+    testingMeanTrace.x.push(key);
     testingMeanTrace.y.push(value / count[key]);
   }
 
-  overviewPlot.traces.push(trainingMeanTrace);
-  overviewPlot.traces.push(testingMeanTrace);
+  overviewPlotTraining.traces.push(trainingMeanTrace);
+  overviewPlotTesting.traces.push(testingMeanTrace);
 
   // return overviewplot and best config plots
-  return { overview: overviewPlot, bestConfigs: bestConfigPlots };
+  return { overview: [overviewPlotTraining, overviewPlotTesting], bestConfigs: bestConfigPlots };
 }
 
 /**

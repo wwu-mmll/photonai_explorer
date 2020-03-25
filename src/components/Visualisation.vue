@@ -1,54 +1,49 @@
 <template>
-  <div class="visualisation">
+  <div id="visualisation">
     <h3>{{ file.name }}</h3>
-    <!-- Plots from hyperpipe.py -->
-    <div id="hyperpipe">
+    <div id="pipeline_structure">
+      <h4>Pipeline structure coming soon? Maybe? Probably?</h4>
+    </div>
+
+    <div id="overview_plots">
       <h4>Overview</h4>
-      <Plot :plotData="overviewPlot"></Plot>
-      <h5>Folds</h5>
       <div class="row">
-        <div class="col s12">
-          <ul class="tabs">
-            <li
-              class="tab col s4"
-              :key="index"
-              v-for="(data, index) in foldPlots"
-            >
-              <a class="active" :href="'#plot' + index">Fold {{ index + 1 }}</a>
-            </li>
-          </ul>
+        <div class="col s12 l6">
+          <Plot :plotData="overviewPlot[0]"></Plot>
         </div>
-        <br /><br />
-        <div
-          :id="'plot' + index"
-          v-for="(data, index) in foldPlots"
-          :key="index"
-        >
-          <Plot :plotData="data"></Plot>
+        <div class="col s12 l6">
+          <Plot :plotData="overviewPlot[1]"></Plot>
         </div>
       </div>
     </div>
 
-    <!-- Plots from outerfold.py -->
-    <div id="outerfold">
-      <h4>Outer folds ({{ this.file.outer_folds.length }})</h4>
-      <div :id="'of-' + index" :key="index" v-for="(fold, index) in outerFolds">
-        <h5>Fold {{ index + 1 }}</h5>
-        <Plot :plotData="data" :key="innerIndex" v-for="(data, innerIndex) in fold.allInclusive"></Plot>
-      </div>
+    <div class="bestconfComplete">
+      <h4>Best configuration</h4>
+      <BestConfigDiagram :configDict="file.best_config.human_readable_config"></BestConfigDiagram>
     </div>
-    <br />
+
+    <div id="table_testing">
+      <h4>Fold comparison</h4>
+      <FoldTable :folds="file.outer_folds" :bestFoldMetrics="file.best_config.best_config_score.validation.metrics"></FoldTable>
+    </div>
+
   </div>
 </template>
 
 <script>
 import { createPlot, PlotTypes } from "../preprocessing/plotCreation";
 import Plot from "./Plot";
+import FoldTable from "./FoldTable"
+import BestConfigElement from "./BestConfigElement"
+import BestConfigDiagram from "./BestConfigDiagram"
 
 export default {
   name: "Visualisation",
   components: {
-    Plot
+    Plot, 
+    FoldTable,
+    //BestConfigElement,
+    BestConfigDiagram
   },
   props: {
     file: Object
@@ -72,6 +67,7 @@ export default {
     for (let i = 1; i <= this.file.outer_folds.length; i++) {
       this.outerFolds.push(createPlot(this.file, {type: PlotTypes.showOuterFold, foldNo: i}))
     }
+    window.console.log("All done extracting data")
   }
 };
 </script>

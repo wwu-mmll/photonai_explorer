@@ -1,4 +1,5 @@
 <template>
+  <!-- SCROLL SPY hinzufügen -->
   <div id="app" class="container">
     <h1>Investigator UI</h1>
     <FileAcceptor :files="files"></FileAcceptor>
@@ -8,6 +9,7 @@
       <ul>
         <li v-for="(file, index) in files" :key="index">
           <Visualisation :file="file"></Visualisation>
+          <br>
           <button @click="removeFile(file)" title="Button">Remove entry</button>
         </li>
       </ul>

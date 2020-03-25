@@ -1,8 +1,7 @@
 <template>
   <div>
     <div
-      class="card-panel teal hoverable"
-      style="height: 200px;"
+      class="dropZone card-panel hoverable"
       @drop.prevent="addFile"
       @dragover.prevent
     >
@@ -45,3 +44,10 @@ export default {
   }
 };
 </script>
+
+<style>
+  div.dropZone {
+    background-color: var(--photon-gray);
+    height: 200px;
+  }
+</style>
