@@ -1,7 +1,7 @@
 <template>
   <!-- SCROLL SPY hinzufügen -->
   <div id="app" class="container">
-    <h1>Investigator UI</h1>
+    <h1>Photon Explorer</h1>
     <FileAcceptor :files="files"></FileAcceptor>
     <br />
     <div v-if="this.files.length > 0">
