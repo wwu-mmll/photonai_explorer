@@ -22,7 +22,7 @@ function createPlot(file, config) {
     case PlotTypes.showPipeline: //////////////////////////////////////////////////////////////////
       return plotShowPipeline(file);
     case PlotTypes.showOuterFold: //////////////////////////////////////////////////////////////////
-      if (!config.hasOwnProperty("foldNo")) {
+      if (!Object.prototype.hasOwnProperty.call(config,"foldNo")) {
         alert(
           'Plottypes.showOuterFold was requested, but needed argument "foldNo" was not supplied!'
         );
@@ -32,9 +32,9 @@ function createPlot(file, config) {
       return plotShowOuterFolds(file, config.foldNo);
     case PlotTypes.testedConfig: //////////////////////////////////////////////////////////////////
       if (
-        !config.hasOwnProperty("foldNo") ||
-        !config.hasOwnProperty("innerFoldNo") ||
-        !config.hasOwnProperty("configIndex")
+        !Object.prototype.hasOwnProperty.call(config,"foldNo") ||
+        !Object.prototype.hasOwnProperty.call(config,"innerFoldNo") ||
+        !Object.prototype.hasOwnProperty.call(config,"configIndex")
       ) {
         alert(
           "Plottypes.testedConfig was requested, but some of the needed arguments are missing. Required: foldNo, innerFoldNo, configIndex"
