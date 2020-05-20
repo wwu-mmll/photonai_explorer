@@ -6,9 +6,8 @@
       <source src="../assets/video/SlowMotion3.mp4" type="video/mp4">
       Browser does not support HTML5 video.
     </video>
-
     <div :class="[(this.files.length === 0) ? videoContentClass : contentClass]">
-      <h1>Investigator UI</h1>
+      <h1>Photon Explorer</h1>
       <FileAcceptor :files="files"></FileAcceptor>
       <br/>
       <div v-if="this.files.length > 0">
