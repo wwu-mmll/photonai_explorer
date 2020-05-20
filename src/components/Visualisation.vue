@@ -24,7 +24,7 @@
 
     <div id="table_testing">
       <h4>Fold comparison</h4>
-      <FoldTable :folds="file.outer_folds" :bestFoldMetrics="file.best_config.best_config_score.validation.metrics"></FoldTable>
+      <FoldTable :folds="file.outer_folds" :bestFoldMetrics="file.best_config.best_config_score.validation.metrics" :best-config-metric="file.hyperpipe_info.best_config_metric"></FoldTable>
     </div>
 
   </div>

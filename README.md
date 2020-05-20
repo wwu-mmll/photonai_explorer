@@ -1,5 +1,7 @@
 # investigator_ui
 
+<img alt=":)" src="https://forthebadge.com/images/badges/designed-in-etch-a-sketch.svg" style="float:left;"></img>
+
 ## Project setup
 
 ```bash
@@ -23,6 +25,10 @@ npm run build
 ```bash
 npm run lint
 ```
+
+### Deployment
+
+See [photon_explorer_serv](https://github.com/wwu-mmll/photon_explorer_serv) for desktop deployment.
 
 ### Customize configuration
 

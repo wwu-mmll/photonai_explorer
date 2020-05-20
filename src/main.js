@@ -1,10 +1,11 @@
 import Vue from 'vue'
 import App from './App.vue'
 
+import 'material-design-icons'
 import 'materialize-css'
 import 'materialize-css/dist/css/materialize.min.css'
 import 'materialize-css/dist/js/materialize.min.js'
-import '../Assets/photonStyle.css'
+import '../assets/css/photonStyle.css'
 
 Vue.config.productionTip = false
 
