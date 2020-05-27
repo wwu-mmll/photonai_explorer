@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: SCROLL SPY hinzufügen -->
   <div id="app">
     <video playsinline autoplay muted loop poster="assets/img/index_back.jpg" id="videoBackground"
            v-show="this.files.length === 0">

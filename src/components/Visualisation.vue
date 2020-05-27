@@ -5,6 +5,8 @@
       <h4>Pipeline structure coming soon? Maybe? Probably?</h4>
     </div>
 
+    <TestedConfigTable :folds="file.outer_folds" :max-metric-count="2"></TestedConfigTable>
+
     <div id="overview_plots">
       <h4>Overview</h4>
       <div class="row">
@@ -24,7 +26,8 @@
 
     <div id="table_testing">
       <h4>Fold comparison</h4>
-      <FoldTable :folds="file.outer_folds" :bestFoldMetrics="file.best_config.best_config_score.validation.metrics" :best-config-metric="file.hyperpipe_info.best_config_metric"></FoldTable>
+      <FoldTable :best-config-metric="file.hyperpipe_info.best_config_metric" :bestFoldMetrics="file.best_config.best_config_score.validation.metrics"
+                 :folds="file.outer_folds" :max-metric-count="2"></FoldTable>
     </div>
 
   </div>
@@ -36,6 +39,7 @@ import Plot from "./Plot";
 import FoldTable from "./FoldTable"
 import BestConfigElement from "./BestConfigElement"
 import BestConfigDiagram from "./BestConfigDiagram"
+import TestedConfigTable from "./TestedConfigTable";
 
 export default {
   name: "Visualisation",
@@ -43,7 +47,8 @@ export default {
     Plot, 
     FoldTable,
     //BestConfigElement,
-    BestConfigDiagram
+    BestConfigDiagram,
+    TestedConfigTable
   },
   props: {
     file: Object

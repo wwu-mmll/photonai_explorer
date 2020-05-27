@@ -5,7 +5,7 @@ import 'material-design-icons'
 import 'materialize-css'
 import 'materialize-css/dist/css/materialize.min.css'
 import 'materialize-css/dist/js/materialize.min.js'
-import '../assets/css/photonStyle.css'
+import '../assets/css/baseStyles.css'
 
 Vue.config.productionTip = false
 

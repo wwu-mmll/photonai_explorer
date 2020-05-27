@@ -34,8 +34,6 @@
 
 <script>
   import BestConfigDiagram from "./BestConfigDiagram"
-  // TODO: Dynamic metrics all around (template headers + body + metricsEqual function). limit #metrics to 10-15? DONE?
-  // TODO: Show best metric in table. Value style: %.3f
   export default {
     name: "FoldTable",
     components: {
@@ -45,12 +43,12 @@
       /* Expects an array of outer folds.  */
       folds: Array,
       bestConfigMetric: String, /* String of metric used to determine best config */
-      bestFoldMetrics: Object  /* metrics of the best fold, to identify it. These keys are used as reference for what columns to use in table */
+      bestFoldMetrics: Object,  /* metrics of the best fold, to identify it. These keys are used as reference for what columns to use in table */
+      maxMetricCount: Number /* this value indicates how many metrics are displayed in the table TODO: How many are good? */
     },
     data: function () {
       return {
-        rowsOpened: [],
-        maxMetricCount: 2 /* this value indicates how many metrics are displayed in the table TODO: How many are good? */
+        rowsOpened: []
       }
     },
     methods: {
@@ -72,7 +70,7 @@
        * @return {boolean} false if attributes do not match, else true
        */
       metricsEqual(m1, m2) {
-        let metricsToCompare = ["accuracy", "precision", "recall", "balanced_accuracy"] // TODO: Get dynamic metrics
+        let metricsToCompare = this.getMetricNames;
         for (let i = 0; i < metricsToCompare.length; i++) {
           const metric = metricsToCompare[i];
 
@@ -95,7 +93,7 @@
     },
     filters: {
       formatMetric(value) {
-        window.console.log(`Filter called with value ${value}`);
+        // window.console.log(`Filter called with value ${value}`);
         return value.toFixed(3);
       }
     }
