@@ -1,87 +1,126 @@
+<!-- Redesigned root page containing navbar & co -->
 <template>
   <div id="app">
-    <video playsinline autoplay muted loop poster="assets/img/index_back.jpg" id="videoBackground"
-           v-show="this.files.length === 0">
-      <source src="../assets/video/SlowMotion3.mp4" type="video/mp4">
-      Browser does not support HTML5 video.
-    </video>
-    <div :class="[(this.files.length === 0) ? videoContentClass : contentClass]">
-      <h1>Photon Explorer</h1>
-      <FileAcceptor :files="files"></FileAcceptor>
-      <br/>
-      <div v-if="this.files.length > 0">
-        <h3>Active analyses ({{ this.files.length }})</h3>
-        <ul>
-          <li v-for="(file, index) in files" :key="index">
-            <Visualisation :file="file"></Visualisation>
-            <br>
-            <button @click="removeFile(file)" title="Button" class="btn-style waves-light btn-small">Remove entry</button>
-          </li>
+    <!-- Navigation -->
+    <nav>
+      <div class="nav-wrapper">
+        <a @click="pageNo = -1" href="#" class="left logoText"><img src="../assets/img/wizard.png" alt="Wizard logo"
+                                               class="logo responsive-img">Photon Explorer</a>
+        <hr v-show="files.length !== 0" class="separatorMain">
+        <ul id="nav-mobile" class="hide-on-med-and-down">
+            <li v-for="(file, index) in files" :key="index">
+              <a style="display: inline-block" href="#" @click="pageNo = index">{{ file.name }}</a>
+              <a @click="removeFile(file)" class="btn-flat"><i class="material-icons">close</i></a>
+              <hr v-show="index !== files.length - 1" class="separatorMinor">
+            </li>
         </ul>
       </div>
-      <div v-else>
-        <h3>Drag a suitable .json file into the box above to begin.</h3>
-      </div>
+    </nav>
+
+    <!-- Content -->
+    <div>
+      <Landingpage class="centered" v-show="showPage(-1)" :files="files" :update-callback="updatePage"></Landingpage>
+      <Visualisation class="content container" v-show="showPage(index)" v-for="(file, index) in files" :file="file" :key="index"></Visualisation>
     </div>
+
   </div>
 </template>
 
 <script>
-  import FileAcceptor from "./components/FileAcceptor";
-  import Visualisation from "./components/Visualisation";
+    import Landingpage from "./components/Landingpage";
+    import Visualisation from "./components/Visualisation";
 
-  export default {
-    name: "app",
-    components: {
-      Visualisation,
-      FileAcceptor
-    },
-    data() {
-      return {
-        files: [],
-        contentClass: "content container",
-        videoContentClass: "contentVideo"
-      };
-    },
-    methods: {
-      removeFile(file) {
-        this.files = this.files.filter(f => {
-          return f !== file;
-        });
-      }
+    export default {
+        name: "App",
+        components: {
+            Landingpage,
+            Visualisation
+        },
+        data() {
+            return {
+                files: [],
+                pageNo: -1     // Current page number. -1 is landing page
+            };
+        },
+        methods: {
+            removeFile(file) {
+                let remPageIndex = this.files.indexOf(file);
+                this.files = this.files.filter(f => {
+                    return f !== file;
+                });
+
+                // handle page state
+                if (this.pageNo === remPageIndex) {
+                    // case: current page is equal to removed index: goto previous page
+                    this.pageNo--;
+                } else if (this.pageNo > remPageIndex) {
+                    // case: current page is after removed index: increase pageNo to stay on same page
+                    this.pageNo--;
+                }
+            },
+            showPage(page) {
+                return this.pageNo === page;
+            },
+            updatePage() {
+                this.pageNo = this.files.length - 1;
+            }
+        }
     }
-  };
 </script>
 
-<style>
+<style scoped>
   #app {
     font-family: "Avenir", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: var(--photon-light);
-    margin-top: 60px;
   }
 
-  #videoBackground {
-    position: fixed;
-    right: 0;
-    top: 0;
-    min-width: 100%;
-    min-height: 100%;
+  nav .logoText {
+    padding-left: 10px;
+    font-size: 2.1rem;
   }
 
-  .contentVideo {
-    position: fixed;
-    left: 7.5%;
-    right: 7.5%;
+  nav .logo {
+    vertical-align: middle;
+    max-height: 3rem;
+  }
+
+  nav .separatorMain {
+    display: inline;
+    vertical-align: middle;
+    float: left;
+    height: 3rem;
+    border-color: var(--photon-light);
+    margin-left: 10px;
+  }
+
+  nav .separatorMinor {
+    display: inline;
+    border-color: var(--photon-gray);
+  }
+
+  nav {
+    background-color: var(--photon-purple);
   }
 
   .content {
     color: black;
   }
 
-  button.btn-style {
-    background-color: var(--photon-gray);
+  .centered {
+    position: absolute;
+    margin: auto;
+    top: 33%;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  li .btn-flat {
+    margin: 0;
+    padding-left: 0;
+    color: inherit;
   }
 </style>

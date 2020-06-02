@@ -3,7 +3,9 @@
     <div class="row">
       <h4 class="col s12 m6 left-align">Tested Configurations</h4>
       <h4 class="col s6 offset-m2 m2" style="display: inline">Search:</h4>
-      <input v-model="currentSearchTerm" class="col s6 m2" style="margin-top: 1em" type="text">
+      <div class="input-field">
+        <input id="tableSearchbar" v-model="currentSearchTerm" class="col s6 m2 autocomplete" style="margin-top: 1em" type="text">
+      </div>
     </div>
 
     <p v-if="metricCount !== metricNames.length" style="color: var(--photon-explorer-dark-pink)">
@@ -12,40 +14,44 @@
     </p>
 
     <div class="tableControllers">
-      <a class="btn" @click="rowsShown.currentCount = rowsShown.minCount">Min</a>
-      <a class="btn" @click="rowsShown.currentCount -= 5">Less(5)</a>
-      <a class="btn" @click="rowsShown.currentCount += 5">More(5)</a>
-      <a class="btn" @click="rowsShown.currentCount = rowsShown.maxCount">Max</a>
+      <a class="btn" @click="alterRowCount(Number.MIN_SAFE_INTEGER)">Min</a>
+      <a class="btn" @click="alterRowCount(-5)">Less(5)</a>
+      <a class="btn" @click="alterRowCount(5)">More(5)</a>
+      <a class="btn" @click="alterRowCount(Number.MAX_SAFE_INTEGER)">Max</a>
     </div>
 
     <table class="responsive-table">
-      <tr>
-        <th @click="sortTable('foldID')">
-          Fold#
-        </th>
-        <th @click="sortTable('configID')">
-          Config#
-        </th>
-        <th @click="sortTable('configString')">
-          Config
-        </th>
-        <th @click="sortTable(metricName)" v-for="(metricName, index) in metricNames" :key="index">
-          {{ metricName }}
-        </th>
-      </tr>
+      <thead>
+        <tr>
+          <th @click="sortTable('foldID')">
+            Fold#
+          </th>
+          <th @click="sortTable('configID')">
+            Config#
+          </th>
+          <th @click="sortTable('configString')">
+            Config
+          </th>
+          <th @click="sortTable(metricName)" v-for="(metricName, index) in metricNames" :key="index">
+            {{ metricName }}
+          </th>
+        </tr>
+      </thead>
 
-      <tr v-for="(row, rowIndex) in getSortedTable()" :key="rowIndex">
-        <td v-for="(value, name, index) in row" :key="index">
-          <span v-html="formatTableCell(value)"></span>
-        </td>
-      </tr>
+      <tbody>
+        <tr v-for="(row, rowIndex) in getSortedTable()" :key="rowIndex">
+          <td v-for="(value, name, index) in row" :key="index">
+            <span v-html="formatTableCell(value)"></span>
+          </td>
+        </tr>
+      </tbody>
     </table>
     debug: sort={{currentSortRow}}, dir={{currentSortDir}}
   </div>
 </template>
 
 <script>
-    export default {
+    export default { // TODO Consider using SCSS & lazy loading table
         name: "TestedConfigTable",
         props: {
             folds: Array,           // An array of folds as found in file.outer_folds
@@ -58,7 +64,7 @@
                 currentSortDir: "ASC",                  // current sorting direction: ASC or DESC
                 currentSearchTerm: "",                  // content of searchbar
                 rowsShown: {                            // Object to manage stats for # shown rows. NOT FOR DIRECT USE! Use computed property 'shownRowsCount
-                    minCount: 10,                       // # rows shown if MIN is pressed
+                    minCount: 5,                        // # rows shown if MIN is pressed
                     currentCount: 10,                   // actual count. Manipulated by setters, read by computed property
                     maxCount: 10000                     // # rows shown if MAX is pressed TODO: is a static value advantageous?
                 }
@@ -93,6 +99,13 @@
              * Also controls the number of rows shown.
              */
             getSortedTable() {
+
+                /*var instance = M.Autocomplete.getInstance(document.querySelector(".autocomplete"));
+                instance.updateData({
+                    "Apple": null,
+                    "Microsoft": null,
+                    "Google": 'https://placehold.it/250x250'
+                });*/ //TODO figure out autocompletion using materializecss
                 return this.rawData.filter(row => row.configString.toLowerCase().includes(this.normalisedSearchTerm))
                     .sort((a, b) => {
                         let modifier = 1;
@@ -116,10 +129,9 @@
              * Returns the input string with the first occurance of the current search term coloured in specified colour
              * @param {String} input String to be searched / coloured
              * @param toColour {String} String to colour
-             * @param colour {String} String representing colour
              * @return {String} Input string with coloured sub section.
              */
-            colourSearchTerm(input, toColour, colour) {
+            colourSearchTerm(input, toColour) {
                 let inputString = String(input);
                 if (toColour !== "" && inputString.toLowerCase().includes(toColour)) {
                     let occuranceIndex = inputString.toLowerCase().indexOf(toColour);
@@ -137,7 +149,30 @@
              * Wrapper simulating filters : x | formatNumericValue | colourSearchTerm(currentSearchTerm, searchTermColour)
              */
             formatTableCell(input) {
-                return this.colourSearchTerm(this.formatNumericValue(input), this.normalisedSearchTerm, this.searchTermColour)
+                return this.colourSearchTerm(this.formatNumericValue(input), this.normalisedSearchTerm)
+            },
+            /**
+             * Use this function to change the numbers of shown rows.
+             * @param {Number} change Number to change row count by.
+             */
+            alterRowCount(change) {
+                let appliedChange = this.rowsShown.currentCount + change;
+                let rowCountNormalised = appliedChange < this.rowsShown.minCount ? this.rowsShown.minCount : appliedChange; // set lower bound
+                rowCountNormalised = rowCountNormalised > this.rowsShown.maxCount ? this.rowsShown.maxCount : rowCountNormalised; // set upper bound
+                this.rowsShown.currentCount = rowCountNormalised;
+            },
+            /**
+             * This function formats any config into a string.
+             * @param {Object} config human_readable_config object as found in any tested config.
+             * @return {String} String representation of given config (contains html tags).
+             */
+            formatHRF(config) {
+                let outputStrings = [];
+                for (const [key, value] of Object.entries(config)) {
+                    outputStrings.push(`<b>${key}</b>: ${value.join(", ")}`);
+                }
+
+                return outputStrings.join(", ");
             }
         },
         computed: {
@@ -165,7 +200,7 @@
                 return this.currentSearchTerm.toLowerCase();
             },
             /**
-             *
+             * Number of rows to be shown. Restricts value between min and max.
              */
             shownRowsCount() {
                 return this.rowsShown.currentCount;
@@ -177,8 +212,8 @@
                 let foldID = fold.fold_nr;
                 fold.tested_config_list.forEach(config => { // iterate configs
                     let configID = config.config_nr;
-                    let configString = JSON.stringify(config.config_dict);      // TODO: make it prettier
-                    let metrics = this.extractMeanMetrics(config.metrics_test)  // TODO: train or test?
+                    let configString = this.formatHRF(config.human_readable_config);
+                    let metrics = this.extractMeanMetrics(config.metrics_test)
 
                     let row = { // Order: Fold#, Config#, Config string, Metrics as returned by computed#metricNames
                         foldID,

@@ -84,7 +84,7 @@
     computed: {
       /**
        * Computed method that returns an array of all metric names (sorted alphabetically), limited in count by maxMetricCount
-       * TODO: Ensure that deciding metric in always included. Where is that information located?
+       * TODO: Ensure that deciding metric in always included. Location: hyperpipe_info.best_config_metric
        * @return {string[]}
        */
       getMetricNames() {

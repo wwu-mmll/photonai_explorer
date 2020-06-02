@@ -1,0 +1,45 @@
+:root {
+  --photon-blue: #2388fe;
+  --photon-purple: #231c44;
+  --photon-light: #f5f4fa;
+  --photon-dark: #1b1c2c;
+  --photon-very-dark: #0e0e1d;
+  --photon-white: #d0cffa;
+  --photon-light-blue: #a9c2fe;
+  --photon-shadow: #121123;
+  --photon-gray: #666666;
+
+  --photon-explorer-dark-pink: #c2185b;
+}
+
+th {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url(../font/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}

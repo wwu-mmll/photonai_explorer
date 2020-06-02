@@ -15,7 +15,8 @@
 <script>
 export default {
   props: {
-    files: Array
+    files: Array,
+      updateCallback: Function
   },
   methods: {
     addFile(e) {
@@ -27,7 +28,8 @@ export default {
           window.console.log(`${f.name} loaded`);
 
           try {
-            this.files.push(JSON.parse(text))
+            this.files.push(JSON.parse(text));
+            this.updateCallback()
           } catch (e) {
             if (e instanceof SyntaxError) {
               alert("No json recognised!")
