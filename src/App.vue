@@ -2,20 +2,22 @@
 <template>
   <div id="app">
     <!-- Navigation -->
-    <nav>
-      <div class="nav-wrapper">
-        <a @click="pageNo = -1" href="#" class="left logoText"><img src="../assets/img/wizard.png" alt="Wizard logo"
-                                               class="logo responsive-img">Photon Explorer</a>
-        <hr v-show="files.length !== 0" class="separatorMain">
-        <ul id="nav-mobile" class="hide-on-med-and-down">
+    <div class="navbar-fixed">
+      <nav>
+        <div class="nav-wrapper">
+          <a @click="pageNo = -1" href="#" class="left logoText"><img src="../assets/img/wizard.png" alt="Wizard logo"
+                                                                      class="logo responsive-img">Photon Explorer</a>
+          <hr v-show="files.length !== 0" class="separatorMain">
+          <ul id="nav-mobile" class="hide-on-med-and-down">
             <li v-for="(file, index) in files" :key="index">
               <a style="display: inline-block" href="#" @click="pageNo = index">{{ file.name }}</a>
               <a @click="removeFile(file)" class="btn-flat"><i class="material-icons">close</i></a>
               <hr v-show="index !== files.length - 1" class="separatorMinor">
             </li>
-        </ul>
-      </div>
-    </nav>
+          </ul>
+        </div>
+      </nav>
+    </div>
 
     <!-- Content -->
     <div>

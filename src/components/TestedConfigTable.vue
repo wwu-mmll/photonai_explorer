@@ -4,7 +4,7 @@
       <h4 class="col s12 m6 left-align">Tested Configurations</h4>
       <h4 class="col s6 offset-m2 m2" style="display: inline">Search:</h4>
       <div class="input-field">
-        <input id="tableSearchbar" v-model="currentSearchTerm" class="col s6 m2 autocomplete" style="margin-top: 1em" type="text">
+        <input autocomplete="off" id="autocomplete-input" v-model.lazy="currentSearchTerm" v-model="currentSearchTerm" class="col s6 m2 autocomplete no-autoinit" style="margin-top: 1em" type="text">
       </div>
     </div>
 
@@ -17,7 +17,7 @@
       <a class="btn" @click="alterRowCount(Number.MIN_SAFE_INTEGER)">Min</a>
       <a class="btn" @click="alterRowCount(-5)">Less(5)</a>
       <a class="btn" @click="alterRowCount(5)">More(5)</a>
-      <a class="btn" @click="alterRowCount(Number.MAX_SAFE_INTEGER)">Max</a>
+      <a class="btn" @click="alterRowCount(Number.MAX_SAFE_INTEGER)">Max ({{ rowsShown.maxCount }})</a>
     </div>
 
     <table class="responsive-table">
@@ -51,7 +51,7 @@
 </template>
 
 <script>
-    export default { // TODO Consider using SCSS & lazy loading table
+    export default {
         name: "TestedConfigTable",
         props: {
             folds: Array,           // An array of folds as found in file.outer_folds
@@ -66,7 +66,7 @@
                 rowsShown: {                            // Object to manage stats for # shown rows. NOT FOR DIRECT USE! Use computed property 'shownRowsCount
                     minCount: 5,                        // # rows shown if MIN is pressed
                     currentCount: 10,                   // actual count. Manipulated by setters, read by computed property
-                    maxCount: 10000                     // # rows shown if MAX is pressed TODO: is a static value advantageous?
+                    maxCount: 100                       // # rows shown if MAX is pressed. 100 is a placeholder and the actual value is set in created() call
                 }
             }
         },
@@ -99,13 +99,6 @@
              * Also controls the number of rows shown.
              */
             getSortedTable() {
-
-                /*var instance = M.Autocomplete.getInstance(document.querySelector(".autocomplete"));
-                instance.updateData({
-                    "Apple": null,
-                    "Microsoft": null,
-                    "Google": 'https://placehold.it/250x250'
-                });*/ //TODO figure out autocompletion using materializecss
                 return this.rawData.filter(row => row.configString.toLowerCase().includes(this.normalisedSearchTerm))
                     .sort((a, b) => {
                         let modifier = 1;
@@ -121,8 +114,9 @@
              * @return {string|*} Either formatted float or whatever was passed in.
              */
             formatNumericValue(value) {
-                if (!isNaN(value) && !Number.isInteger(value))
+                if (!isNaN(parseFloat(value)) && !Number.isInteger(value)) {
                     return value.toFixed(3);
+                }
                 return value;
             },
             /**
@@ -204,6 +198,27 @@
              */
             shownRowsCount() {
                 return this.rowsShown.currentCount;
+            },
+            /**
+             * Represents all options shown in the search dropdown. Contains all unique config keys
+             */
+            autocompletionData() {
+                let configKeys = [];
+                this.folds.forEach(fold => { // iterate folds
+                    fold.tested_config_list.forEach(config => { // iterate configs
+                        // flatten and add individually
+                        configKeys.push(... [].concat.apply([], Object.values(config.human_readable_config)))
+                    })
+                })
+                // make array unique
+                configKeys = [...new Set(configKeys)];
+
+                // remove values from strings
+                configKeys = configKeys.map(value => value.split("=", 2)[0])
+
+                let keys = {};
+                configKeys.forEach(value => keys[value] = null);
+                return keys;
             }
         },
         created() {
@@ -225,8 +240,15 @@
                     this.rawData.push(row);
                 })
             })
+
+            // set max length for table
+            this.rowsShown.maxCount = this.rawData.length;
         },
-        filters: {}
+        mounted() {
+            // Populate autocomplete
+            var elems = document.querySelectorAll('.autocomplete');
+            var instances = M.Autocomplete.init(elems, {data: this.autocompletionData});
+        }
 
     }
 </script>

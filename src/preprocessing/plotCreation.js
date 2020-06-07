@@ -70,10 +70,14 @@ function plotShowPipeline(file) {
   let testingMetrics = {};
   let bestConfigPlots = [];
 
+  let uniqueMetricPlotTraces = []; // One metric per plot in train -> test -> train ... order
+
   let overviewPlotTraining = new PlotlyPlot("Training", [], false);
   let overviewPlotTesting = new PlotlyPlot('Testing', [], false);
 
   file.outer_folds.forEach(fold => {
+
+    // MAIN OVERVIEW PLOT TRACES
     let overviewPlotTrainingTrace = new PlotlyTrace(
       `Fold ${fold.fold_nr}`,
       ...Array(3).fill(undefined),
@@ -103,6 +107,9 @@ function plotShowPipeline(file) {
 
     overviewPlotTraining.traces.push(overviewPlotTrainingTrace);
     overviewPlotTesting.traces.push(overviewPlotTestingTrace);
+
+    // collect traces for unique plots
+    uniqueMetricPlotTraces.push(overviewPlotTrainingTrace, overviewPlotTestingTrace)
 
     let metricTrainingTrace = new BestConfigTrace(
       "Training",
@@ -177,6 +184,9 @@ function plotShowPipeline(file) {
 
   overviewPlotTraining.traces.push(trainingMeanTrace);
   overviewPlotTesting.traces.push(testingMeanTrace);
+
+  // CREATE UNIQUE PLOTS PER METRIC
+
 
   // return overviewplot and best config plots
   return { overview: [overviewPlotTraining, overviewPlotTesting], bestConfigs: bestConfigPlots };

@@ -67,9 +67,11 @@ class PlotlyTrace {
   /**
    * Converts object into plotly acceptable object.
    * @param {Boolean} showError Should error data be shown (if available / allowed)
+   * @param {Object} additionalData Any data is fed directly into the returned trace object at root level.
+   * Useful for additional styles, instructions, ...
    * @returns {Object} Object representing trace in plotly compliant format.
    */
-  toTrace(showError) {
+  toTrace(showError, additionalData) {
     return {
       name: this.traceName,
       mode: this.mode,
