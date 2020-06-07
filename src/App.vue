@@ -5,8 +5,7 @@
     <div class="navbar-fixed">
       <nav>
         <div class="nav-wrapper">
-          <a @click="pageNo = -1" href="#" class="left logoText"><img src="../assets/img/wizard.png" alt="Wizard logo"
-                                                                      class="logo responsive-img">Photon Explorer</a>
+          <a @click="pageNo = -1" href="#" class="left logoText">PHOTON Explorer</a>
           <hr v-show="files.length !== 0" class="separatorMain">
           <ul id="nav-mobile" class="hide-on-med-and-down">
             <li v-for="(file, index) in files" :key="index">
@@ -22,7 +21,7 @@
     <!-- Content -->
     <div>
       <Landingpage class="centered" v-show="showPage(-1)" :files="files" :update-callback="updatePage"></Landingpage>
-      <Visualisation class="content container" v-show="showPage(index)" v-for="(file, index) in files" :file="file" :key="index"></Visualisation>
+      <Visualisation class="content" v-show="showPage(index)" v-for="(file, index) in files" :file="file" :key="index"></Visualisation>
     </div>
 
   </div>
@@ -36,7 +35,7 @@
         name: "App",
         components: {
             Landingpage,
-            Visualisation
+            Visualisation,
         },
         data() {
             return {
@@ -72,7 +71,7 @@
 
 <style scoped>
   #app {
-    font-family: "Avenir", Helvetica, Arial, sans-serif;
+    font-family: "Oxygen-Regular", "Avenir", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
@@ -109,6 +108,8 @@
 
   .content {
     color: black;
+    margin: auto;
+    width: 90%;
   }
 
   .centered {

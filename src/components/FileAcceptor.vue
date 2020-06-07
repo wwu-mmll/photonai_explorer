@@ -1,10 +1,7 @@
 <template>
   <div>
     <div
-      class="dropZone card-panel hoverable"
-      @drop.prevent="addFile"
-      @dragover.prevent
-    >
+      class="dropZone card-panel hoverable" @drop.prevent="addFile" @dragover.prevent>
       <span class="white-text flow-text">
         I eat your files! NomNomNom
       </span>
@@ -50,6 +47,7 @@ export default {
 <style>
   div.dropZone {
     background-color: var(--photon-gray);
+    opacity: .7;
     height: 200px;
   }
 </style>

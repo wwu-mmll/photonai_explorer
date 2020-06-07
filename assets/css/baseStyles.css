@@ -22,14 +22,20 @@ th {
 }
 
 @font-face {
+  font-family: "Oxygen-Regular";
+  font-style: normal;
+  src: url("../font/Oxygen-Regular.ttf");
+}
+
+@font-face {
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url(../font/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+  src: url(../font/materialIcons.woff2) format('woff2');
 }
 
 .material-icons {
-  font-family: 'Material Icons';
+  font-family: 'Material Icons', serif;
   font-weight: normal;
   font-style: normal;
   font-size: 24px;

@@ -1,7 +1,7 @@
 import { PlotlyPlot, PlotlyTrace } from "./PlotlyPlot";
 import { BestConfigTrace, BestConfigPlot } from "./BestConfigPlot";
 
-export { createPlot, plotFoldComparisonData, PlotTypes };
+export { createPlot, plotFoldComparisonData, PlotTypes, plotPerformance };
 
 // Enumeration containing plot types for use in 'createPlot' function
 const PlotTypes = Object.freeze({
@@ -59,6 +59,90 @@ function createPlot(file, config) {
 }
 
 /**
+ * Plotting function generating all data needed for plots in PerformancePlots component.
+ * @param {Object} file Pipeline file needed for processing.
+ * @return {Object} Object containing metric names as keys and plot data as values
+ */
+function plotPerformance(file) { // TODO integrate into createPlot function? Consider removing that system
+  let outputData = {};  // result data
+
+  // extract metrics from dummy_results for iteration
+  Object.keys(file.outer_folds[0].dummy_results.training.metrics).forEach(metricName => {
+    // Create empty plot
+    outputData[metricName] = new PlotlyPlot(metricName, [], false);
+
+    let shapes = [];      // array containing all shape objects representing horizontal dummy result data
+    let meanValues = {
+      training: [],
+      validation: []
+    };  // object storing values for mean trace calculation in keys: training, validation
+
+
+    // add dummy result
+    // Extracts .MEAN value from metric list
+    let dummyValueExtractor = (metric) => file.dummy_estimator.train
+      .filter((metricObject) => metricObject.metric_name === metric && metricObject.operation.endsWith(".MEAN"))
+      .map((metricObject) => metricObject.value)[0];
+
+    let dummyResult = dummyValueExtractor(metricName);
+    shapes.push({
+      type: "line",
+      xref: "paper",
+      x0: 0,
+      y0: dummyResult,
+      x1: 1,
+      y1: dummyResult,
+      line: {
+        color: "rgb(210,22,22)",
+        width: 4
+      }
+    })
+
+    // add dummy result shapes to plot
+    outputData[metricName].addStyle("shapes", shapes);
+
+
+    // iterate over folds
+    file.outer_folds.forEach(fold => {
+      let foldIndex = fold.fold_nr;
+
+      // get fold data
+      let foldTrain = fold.best_config.best_config_score.training.metrics[metricName];
+      let foldValidation = fold.best_config.best_config_score.validation.metrics[metricName];
+
+      meanValues["training"].push(foldTrain);
+      meanValues["validation"].push(foldValidation);
+
+      let trainingTrace = new PlotlyTrace(`Fold ${foldIndex}`, undefined, undefined, undefined, "rgb(91,91,91)");
+      let validationTrace = new PlotlyTrace(`Fold ${foldIndex}`, undefined, undefined, undefined, "rgb(91,91,91)");
+
+      trainingTrace.x.push("Training");
+      trainingTrace.y.push(foldTrain);
+      validationTrace.x.push("Validation");
+      validationTrace.y.push(foldValidation);
+
+      outputData[metricName].traces.push(trainingTrace, validationTrace);
+
+    })
+
+    // calculate mean values for bar trace
+    let meanTrainingTrace = new PlotlyTrace("Mean training", undefined, "bar", undefined, "rgb(214, 123, 25)");
+    let meanValidationTrace = new PlotlyTrace("Mean validation", undefined, "bar", undefined, "rgb(214, 123, 25)");
+
+    let average = (array) => array.reduce((a, b) => a + b) / array.length;
+
+    meanTrainingTrace.x.push("Training");
+    meanTrainingTrace.y.push(average(meanValues.training))
+    meanValidationTrace.x.push("Validation");
+    meanValidationTrace.y.push(average(meanValues.validation))
+
+    outputData[metricName].traces.push(meanTrainingTrace, meanValidationTrace);
+  })
+
+  return outputData;
+}
+
+/**
  * Plotting function for the general overview plot as seen in hyperpipe.py
  * @param {Object} file Object containing all needed information.
  * @returns An object of plots: One overview plot (overview) and a config plot for each fold (best plot each; bestConfigs)
@@ -69,8 +153,6 @@ function plotShowPipeline(file) {
   let trainingMetrics = {};
   let testingMetrics = {};
   let bestConfigPlots = [];
-
-  let uniqueMetricPlotTraces = []; // One metric per plot in train -> test -> train ... order
 
   let overviewPlotTraining = new PlotlyPlot("Training", [], false);
   let overviewPlotTesting = new PlotlyPlot('Testing', [], false);
@@ -107,9 +189,6 @@ function plotShowPipeline(file) {
 
     overviewPlotTraining.traces.push(overviewPlotTrainingTrace);
     overviewPlotTesting.traces.push(overviewPlotTestingTrace);
-
-    // collect traces for unique plots
-    uniqueMetricPlotTraces.push(overviewPlotTrainingTrace, overviewPlotTestingTrace)
 
     let metricTrainingTrace = new BestConfigTrace(
       "Training",
@@ -184,9 +263,6 @@ function plotShowPipeline(file) {
 
   overviewPlotTraining.traces.push(trainingMeanTrace);
   overviewPlotTesting.traces.push(testingMeanTrace);
-
-  // CREATE UNIQUE PLOTS PER METRIC
-
 
   // return overviewplot and best config plots
   return { overview: [overviewPlotTraining, overviewPlotTesting], bestConfigs: bestConfigPlots };

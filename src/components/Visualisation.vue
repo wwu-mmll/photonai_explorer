@@ -1,78 +1,125 @@
 <template>
-  <div id="visualisation">
-    <h3>{{ file.name }}</h3>
-    <div id="pipeline_structure">
-      <h4>Pipeline structure coming soon? Maybe? Probably?</h4>
-    </div>
+  <div class="viz">
+    <h3 class="left-align">{{ pipeName }}</h3>
+    <h5 class="left-align">{{ pipeDate }}</h5>
+    <br>
 
-    <TestedConfigTable :folds="file.outer_folds" :max-metric-count="2"></TestedConfigTable>
-
-    <div id="overview_plots">
-      <h4>Overview</h4>
-      <div class="row">
-        <div class="col s12 l6">
-          <Plot :plotData="overviewPlot[0]"></Plot>
-        </div>
-        <div class="col s12 l6">
-          <Plot :plotData="overviewPlot[1]"></Plot>
-        </div>
+    <div class="row">
+      <div class="col s8">
+        <h4 class="left-align">Best config diagram</h4>
+        <BestConfigDiagram :config-dict="file.best_config.human_readable_config"></BestConfigDiagram>
+      </div>
+      <div class="col s4">
+        <h4 class="left-align">HP Optimisation</h4>
       </div>
     </div>
 
-    <div class="bestconfComplete">
-      <h4>Best configuration</h4>
-      <BestConfigDiagram :configDict="file.best_config.human_readable_config"></BestConfigDiagram>
+    <div class="row">
+      <div class="col s8">
+        <h4 class="left-align">Performance</h4>
+        <PerformancePlots :file="file"></PerformancePlots>
+      </div>
+      <div class="col s4">
+        <h4 class="left-align">Confusion matrix</h4>
+      </div>
     </div>
 
-    <div id="table_testing">
-      <h4>Fold comparison</h4>
-      <FoldTable :best-config-metric="file.hyperpipe_info.best_config_metric" :bestFoldMetrics="file.best_config.best_config_score.validation.metrics"
-                 :folds="file.outer_folds" :max-metric-count="2"></FoldTable>
+    <div class="row">
+      <div class="col s8">
+        <div class="header">
+          <h4>Fold Information</h4>
+          <a @click="showFoldTable = !showFoldTable" href="#" class="btn-flat expansionBtn">
+            <i class="material-icons" style="font-size: 3rem">{{ foldInfoButtonText }}</i>
+          </a>
+        </div>
+        <FoldTable style="float: none" v-show="showFoldTable" :best-config-metric="file.hyperpipe_info.best_config_metric"
+                   :bestFoldMetrics="file.best_config.best_config_score.validation.metrics" :folds="file.outer_folds" :max-metric-count="99"></FoldTable>
+      </div>
+      <div class="col s4">
+        <h4 class="left-align">Cross Validation</h4>
+        <p class="left-align"><b>Outer Fold CV:</b> {{ file.hyperpipe_info.cross_validation.OuterCV }}</p>
+        <p class="left-align"><b>Inner Fold CV:</b> {{ file.hyperpipe_info.cross_validation.InnerCV }}</p>
+      </div>
     </div>
 
+    <!-- One column once again -->
+    <TestedConfigTable class="configTable" :max-metric-count="0" :folds="file.outer_folds"></TestedConfigTable>
   </div>
 </template>
 
 <script>
-import { createPlot, PlotTypes } from "../preprocessing/plotCreation";
-import Plot from "./Plot";
-import FoldTable from "./FoldTable"
-import BestConfigElement from "./BestConfigElement"
-import BestConfigDiagram from "./BestConfigDiagram"
-import TestedConfigTable from "./TestedConfigTable";
+  import BestConfigDiagram from "./BestConfigDiagram";
+  import FoldTable from "./FoldTable";
+  import TestedConfigTable from "./TestedConfigTable";
+  import PerformancePlots from "./PerformancePlots";
 
-export default {
-  name: "Visualisation",
-  components: {
-    Plot, 
-    FoldTable,
-    //BestConfigElement,
-    BestConfigDiagram,
-    TestedConfigTable
-  },
-  props: {
-    file: Object
-  },
-  data: function() {
-    return {
-      overviewPlot: {},
-      foldPlots: [],
-      outerFolds: []
-    };
-  },
-  mounted() {
-    // eslint-disable-next-line
-    M.AutoInit();
-  },
-  created() {
-    let hyperpipePlots = createPlot(this.file, {type: PlotTypes.showPipeline});
-    this.overviewPlot = hyperpipePlots.overview;
-    this.foldPlots = hyperpipePlots.bestConfigs;
-
-    for (let i = 1; i <= this.file.outer_folds.length; i++) {
-      this.outerFolds.push(createPlot(this.file, {type: PlotTypes.showOuterFold, foldNo: i}))
+  export default {
+    name: "NewVisualisation",
+    components: {
+      BestConfigDiagram,
+      FoldTable,
+      TestedConfigTable,
+      PerformancePlots
+    },
+    props: {
+      file: Object
+    },
+    data: function() {
+      return {
+        showFoldTable: false
+      }
+    },
+    computed: {
+      /**
+       * Returns name of this pipe
+       */
+      pipeName() {
+        return this.file.name;
+      },
+      /**
+       * Returns creation date of this pipe
+       */
+      pipeDate() {
+        let unixTime = this.file.computation_end_time["$date"];
+        return new Date(unixTime).toLocaleString();
+      },
+      /**
+       * Returns button text for expand / collapse button controlling FoldTable visibility
+       */
+      foldInfoButtonText() {
+        return this.showFoldTable ? "expand_less" : "expand_more";
+      }
+    },
+    mounted() {
+      M.AutoInit();
     }
-    window.console.log("All done extracting data")
   }
-};
 </script>
+
+<style scoped>
+  .header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  a.btn {
+    background-color: var(--photon-gray);
+  }
+
+  a.expansionBtn {
+    margin-top: 1.52rem;
+    background-color: white;
+  }
+
+  .configTable {
+    margin-top: 100px;
+  }
+
+  img {
+    max-width: 400px;
+  }
+
+  p {
+    font-size: medium;
+  }
+</style>

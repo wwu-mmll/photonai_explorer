@@ -1,5 +1,5 @@
 <template>
-  <div class="plt z-depth-1">
+  <div class="plt">
     <Plotly :data="getPlotData('data')" :layout="getPlotData('layout')" :display-mode-bar="false"></Plotly>
   </div>
 </template>

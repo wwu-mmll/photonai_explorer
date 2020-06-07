@@ -34,7 +34,7 @@
 
 <script>
   import BestConfigDiagram from "./BestConfigDiagram"
-  export default {
+  export default { // TODO: fix metric # restriction message: See TestedConfigTable for reference
     name: "FoldTable",
     components: {
       BestConfigDiagram

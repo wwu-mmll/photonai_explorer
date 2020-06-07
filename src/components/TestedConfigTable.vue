@@ -3,8 +3,9 @@
     <div class="row">
       <h4 class="col s12 m6 left-align">Tested Configurations</h4>
       <h4 class="col s6 offset-m2 m2" style="display: inline">Search:</h4>
-      <div class="input-field">
-        <input autocomplete="off" id="autocomplete-input" v-model.lazy="currentSearchTerm" v-model="currentSearchTerm" class="col s6 m2 autocomplete no-autoinit" style="margin-top: 1em" type="text">
+      <div class="input-field"> <!-- TODO: Use flexbox like in Vis header style -->
+        <input autocomplete="off" id="autocomplete-input" v-model.lazy="currentSearchTerm" v-model="currentSearchTerm"
+               class="col s6 m2 autocomplete no-autoinit" style="margin-top: 1em" type="text">
       </div>
     </div>
 
@@ -14,39 +15,46 @@
     </p>
 
     <div class="tableControllers">
-      <a class="btn" @click="alterRowCount(Number.MIN_SAFE_INTEGER)">Min</a>
-      <a class="btn" @click="alterRowCount(-5)">Less(5)</a>
-      <a class="btn" @click="alterRowCount(5)">More(5)</a>
-      <a class="btn" @click="alterRowCount(Number.MAX_SAFE_INTEGER)">Max ({{ rowsShown.maxCount }})</a>
+      <a class="btn tooltipped" data-position="bottom" data-tooltip="Min (5)" @click="alterRowCount(Number.MIN_SAFE_INTEGER)">
+        <i class="material-icons">first_page</i>
+      </a>
+      <a class="btn tooltipped" data-position="bottom" data-tooltip="Less (5)" @click="alterRowCount(-5)">
+        <i class="material-icons">chevron_left</i>
+      </a>
+      <a class="btn tooltipped" data-position="bottom" data-tooltip="More (5)" @click="alterRowCount(5)">
+        <i class="material-icons">chevron_right</i>
+      </a>
+      <a class="btn tooltipped" data-position="bottom" :data-tooltip="'Max (' + rowsShown.maxCount + ')'" @click="alterRowCount(Number.MAX_SAFE_INTEGER)">
+        <i class="material-icons">last_page</i>
+      </a>
     </div>
 
     <table class="responsive-table">
       <thead>
-        <tr>
-          <th @click="sortTable('foldID')">
-            Fold#
-          </th>
-          <th @click="sortTable('configID')">
-            Config#
-          </th>
-          <th @click="sortTable('configString')">
-            Config
-          </th>
-          <th @click="sortTable(metricName)" v-for="(metricName, index) in metricNames" :key="index">
-            {{ metricName }}
-          </th>
-        </tr>
+      <tr>
+        <th @click="sortTable('foldID')">
+          Fold#
+        </th>
+        <th @click="sortTable('configID')">
+          Config#
+        </th>
+        <th @click="sortTable('configString')">
+          Config
+        </th>
+        <th @click="sortTable(metricName)" v-for="(metricName, index) in metricNames" :key="index">
+          {{ metricName }}
+        </th>
+      </tr>
       </thead>
 
       <tbody>
-        <tr v-for="(row, rowIndex) in getSortedTable()" :key="rowIndex">
-          <td v-for="(value, name, index) in row" :key="index">
-            <span v-html="formatTableCell(value)"></span>
-          </td>
-        </tr>
+      <tr v-for="(row, rowIndex) in getSortedTable()" :key="rowIndex">
+        <td v-for="(value, name, index) in row" :key="index">
+          <span v-html="formatTableCell(value)"></span>
+        </td>
+      </tr>
       </tbody>
     </table>
-    debug: sort={{currentSortRow}}, dir={{currentSortDir}}
   </div>
 </template>
 
@@ -55,7 +63,7 @@
         name: "TestedConfigTable",
         props: {
             folds: Array,           // An array of folds as found in file.outer_folds
-            maxMetricCount: Number  // Number of metrics shown in table
+            maxMetricCount: Number  // Number of metrics shown in table. A value < 1 shows all
         },
         data() {
             return {
@@ -65,7 +73,7 @@
                 currentSearchTerm: "",                  // content of searchbar
                 rowsShown: {                            // Object to manage stats for # shown rows. NOT FOR DIRECT USE! Use computed property 'shownRowsCount
                     minCount: 5,                        // # rows shown if MIN is pressed
-                    currentCount: 10,                   // actual count. Manipulated by setters, read by computed property
+                    currentCount: 5,                    // actual count. Manipulated by setters, read by computed property
                     maxCount: 100                       // # rows shown if MAX is pressed. 100 is a placeholder and the actual value is set in created() call
                 }
             }
@@ -171,12 +179,18 @@
         },
         computed: {
             /**
+             * Returns normalised max shown metrics. Based on 'maxMetricCountProp'
+             */
+            maxAllowedMetrics() {
+                return this.maxMetricCount < 1 ? this.metricCount : this.maxMetricCount;
+            },
+            /**
              * Return array of metrics limited by prop 'maxMetricCount'
              * @return {string[]} String array of alphabetically sorted metric names
              */
             metricNames() {
                 let metricObject = this.folds[0].best_config.best_config_score.training.metrics;
-                return Object.keys(metricObject).sort().slice(0, this.maxMetricCount);
+                return Object.keys(metricObject).sort().slice(0, this.maxAllowedMetrics);
             },
             /**
              * Returns number of metrics used in analysis
@@ -207,7 +221,7 @@
                 this.folds.forEach(fold => { // iterate folds
                     fold.tested_config_list.forEach(config => { // iterate configs
                         // flatten and add individually
-                        configKeys.push(... [].concat.apply([], Object.values(config.human_readable_config)))
+                        configKeys.push(...[].concat.apply([], Object.values(config.human_readable_config)))
                     })
                 })
                 // make array unique
@@ -260,6 +274,7 @@
 
   a.btn {
     background-color: var(--photon-gray);
+    transition-property: background-color;
     margin-right: 15px;
   }
 </style>
