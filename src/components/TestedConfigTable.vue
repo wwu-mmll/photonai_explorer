@@ -15,7 +15,8 @@
     </p>
 
     <div class="tableControllers">
-      <a class="btn tooltipped" data-position="bottom" data-tooltip="Min (5)" @click="alterRowCount(Number.MIN_SAFE_INTEGER)">
+      <a class="btn tooltipped" data-position="bottom" data-tooltip="Min (5)"
+         @click="alterRowCount(Number.MIN_SAFE_INTEGER)">
         <i class="material-icons">first_page</i>
       </a>
       <a class="btn tooltipped" data-position="bottom" data-tooltip="Less (5)" @click="alterRowCount(-5)">
@@ -24,7 +25,8 @@
       <a class="btn tooltipped" data-position="bottom" data-tooltip="More (5)" @click="alterRowCount(5)">
         <i class="material-icons">chevron_right</i>
       </a>
-      <a class="btn tooltipped" data-position="bottom" :data-tooltip="'Max (' + rowsShown.maxCount + ')'" @click="alterRowCount(Number.MAX_SAFE_INTEGER)">
+      <a class="btn tooltipped" data-position="bottom" :data-tooltip="'Max (' + rowsShown.maxCount + ')'"
+         @click="alterRowCount(Number.MAX_SAFE_INTEGER)">
         <i class="material-icons">last_page</i>
       </a>
     </div>
@@ -59,212 +61,233 @@
 </template>
 
 <script>
-    export default {
-        name: "TestedConfigTable",
-        props: {
-            folds: Array,           // An array of folds as found in file.outer_folds
-            maxMetricCount: Number  // Number of metrics shown in table. A value < 1 shows all
-        },
-        data() {
-            return {
-                rawData: [],
-                currentSortRow: "foldID",               // column name to sort by
-                currentSortDir: "ASC",                  // current sorting direction: ASC or DESC
-                currentSearchTerm: "",                  // content of searchbar
-                rowsShown: {                            // Object to manage stats for # shown rows. NOT FOR DIRECT USE! Use computed property 'shownRowsCount
-                    minCount: 5,                        // # rows shown if MIN is pressed
-                    currentCount: 5,                    // actual count. Manipulated by setters, read by computed property
-                    maxCount: 100                       // # rows shown if MAX is pressed. 100 is a placeholder and the actual value is set in created() call
-                }
-            }
-        },
-        methods: {
-            /**
-             * Function to extract mean metrics from all metrics.
-             * @param {Object[]} metricList Array of metric object as seen in ...tested_config_list.metrics_*
-             * @return {Object} Object containing mean value of all metrics passed in input.
-             */
-            extractMeanMetrics(metricList) {
-                let rMetrics = {};
-                metricList.forEach(metric => {
-                    if (metric.operation.endsWith(".MEAN") && this.metricNames.includes(metric.metric_name))
-                        rMetrics[metric.metric_name] = metric.value
-                })
 
-                return rMetrics;
-            },
-            /**
-             * Set row to be sorted by and direction. Property change triggers actual sorting
-             */
-            sortTable(row) {
-                if (row === this.currentSortRow)
-                    this.currentSortDir = this.currentSortDir === 'ASC' ? 'DESC' : 'ASC';
+  import {normalizeConfig} from "../preprocessing/configInterpreter"
 
-                this.currentSortRow = row;
-            },
-            /**
-             * Returns a sorted and filtered version of rawData according to current sorting properties.
-             * Also controls the number of rows shown.
-             */
-            getSortedTable() {
-                return this.rawData.filter(row => row.configString.toLowerCase().includes(this.normalisedSearchTerm))
-                    .sort((a, b) => {
-                        let modifier = 1;
-                        if (this.currentSortDir === 'DESC') modifier = -1;
-                        if (a[this.currentSortRow] < b[this.currentSortRow]) return -1 * modifier;
-                        if (a[this.currentSortRow] > b[this.currentSortRow]) return 1 * modifier;
-                        return 0;
-                    }).slice(0, this.shownRowsCount)
-            },
-            /**
-             * Filter that limits floating point values to 3 fraction digits and lets everything else pass.
-             * @param value Value to format
-             * @return {string|*} Either formatted float or whatever was passed in.
-             */
-            formatNumericValue(value) {
-                if (!isNaN(parseFloat(value)) && !Number.isInteger(value)) {
-                    return value.toFixed(3);
-                }
-                return value;
-            },
-            /**
-             * Returns the input string with the first occurance of the current search term coloured in specified colour
-             * @param {String} input String to be searched / coloured
-             * @param toColour {String} String to colour
-             * @return {String} Input string with coloured sub section.
-             */
-            colourSearchTerm(input, toColour) {
-                let inputString = String(input);
-                if (toColour !== "" && inputString.toLowerCase().includes(toColour)) {
-                    let occuranceIndex = inputString.toLowerCase().indexOf(toColour);
-                    let occuranceSize = toColour.length;
+  export default {
+    name: "TestedConfigTable",
+    props: {
+      folds: Array,           // An array of folds as found in file.outer_folds
+      maxMetricCount: Number  // Number of metrics shown in table. A value < 1 shows all
+    },
+    data() {
+      return {
+        rawData: [],
+        currentSortRow: "foldID",               // column name to sort by
+        currentSortDir: "ASC",                  // current sorting direction: ASC or DESC
+        currentSearchTerm: "",                  // content of searchbar
+        rowsShown: {                            // Object to manage stats for # shown rows. NOT FOR DIRECT USE! Use computed property 'shownRowsCount
+          minCount: 5,                        // # rows shown if MIN is pressed
+          currentCount: 5,                    // actual count. Manipulated by setters, read by computed property
+          maxCount: 100                       // # rows shown if MAX is pressed. 100 is a placeholder and the actual value is set in created() call
+        }
+      }
+    },
+    methods: {
+      /**
+       * Function to extract mean metrics from all metrics.
+       * @param {Object[]} metricList Array of metric object as seen in ...tested_config_list.metrics_*
+       * @return {Object} Object containing mean value of all metrics passed in input.
+       */
+      extractMeanMetrics(metricList) {
+        let rMetrics = {};
+        metricList.forEach(metric => {
+          if (metric.operation.endsWith(".MEAN") && this.metricNames.includes(metric.metric_name))
+            rMetrics[metric.metric_name] = metric.value
+        })
 
-                    let first = inputString.substring(0, occuranceIndex);
-                    let coloured = `<span class="markedText">${inputString.substr(occuranceIndex, occuranceSize)}</span>`;
-                    let last = inputString.substring(occuranceIndex + occuranceSize);
+        return rMetrics;
+      },
+      /**
+       * Set row to be sorted by and direction. Property change triggers actual sorting
+       */
+      sortTable(row) {
+        if (row === this.currentSortRow)
+          this.currentSortDir = this.currentSortDir === 'ASC' ? 'DESC' : 'ASC';
 
-                    return first + coloured + last;
-                }
-                return input;
-            },
-            /**
-             * Wrapper simulating filters : x | formatNumericValue | colourSearchTerm(currentSearchTerm, searchTermColour)
-             */
-            formatTableCell(input) {
-                return this.colourSearchTerm(this.formatNumericValue(input), this.normalisedSearchTerm)
-            },
-            /**
-             * Use this function to change the numbers of shown rows.
-             * @param {Number} change Number to change row count by.
-             */
-            alterRowCount(change) {
-                let appliedChange = this.rowsShown.currentCount + change;
-                let rowCountNormalised = appliedChange < this.rowsShown.minCount ? this.rowsShown.minCount : appliedChange; // set lower bound
-                rowCountNormalised = rowCountNormalised > this.rowsShown.maxCount ? this.rowsShown.maxCount : rowCountNormalised; // set upper bound
-                this.rowsShown.currentCount = rowCountNormalised;
-            },
-            /**
-             * This function formats any config into a string.
-             * @param {Object} config human_readable_config object as found in any tested config.
-             * @return {String} String representation of given config (contains html tags).
-             */
-            formatHRF(config) {
-                let outputStrings = [];
-                for (const [key, value] of Object.entries(config)) {
-                    outputStrings.push(`<b>${key}</b>: ${value.join(", ")}`);
-                }
+        this.currentSortRow = row;
+      },
+      /**
+       * Returns a sorted and filtered version of rawData according to current sorting properties.
+       * Also controls the number of rows shown.
+       */
+      getSortedTable() {
+        return this.rawData.filter(row => row.configString.toLowerCase().includes(this.normalisedSearchTerm))
+          .sort((a, b) => {
+            let modifier = 1;
+            if (this.currentSortDir === 'DESC') modifier = -1;
+            if (a[this.currentSortRow] < b[this.currentSortRow]) return -1 * modifier;
+            if (a[this.currentSortRow] > b[this.currentSortRow]) return 1 * modifier;
+            return 0;
+          }).slice(0, this.shownRowsCount)
+      },
+      /**
+       * Filter that limits floating point values to 3 fraction digits and lets everything else pass.
+       * @param value Value to format
+       * @return {string|*} Either formatted float or whatever was passed in.
+       */
+      formatNumericValue(value) {
+        if (!isNaN(parseFloat(value)) && !Number.isInteger(value)) {
+          return value.toFixed(3);
+        }
+        return value;
+      },
+      /**
+       * Returns the input string with the first occurance of the current search term coloured in specified colour
+       * @param {String} input String to be searched / coloured
+       * @param toColour {String} String to colour
+       * @return {String} Input string with coloured sub section.
+       */
+      colourSearchTerm(input, toColour) {
+        let inputString = String(input);
+        if (toColour !== "" && inputString.toLowerCase().includes(toColour)) {
+          let occuranceIndex = inputString.toLowerCase().indexOf(toColour);
+          let occuranceSize = toColour.length;
 
-                return outputStrings.join(", ");
-            }
-        },
-        computed: {
-            /**
-             * Returns normalised max shown metrics. Based on 'maxMetricCountProp'
-             */
-            maxAllowedMetrics() {
-                return this.maxMetricCount < 1 ? this.metricCount : this.maxMetricCount;
-            },
-            /**
-             * Return array of metrics limited by prop 'maxMetricCount'
-             * @return {string[]} String array of alphabetically sorted metric names
-             */
-            metricNames() {
-                let metricObject = this.folds[0].best_config.best_config_score.training.metrics;
-                return Object.keys(metricObject).sort().slice(0, this.maxAllowedMetrics);
-            },
-            /**
-             * Returns number of metrics used in analysis
-             * @return {Number} metric count
-             */
-            metricCount() {
-                let metricObject = this.folds[0].best_config.best_config_score.training.metrics;
-                return Object.keys(metricObject).length;
-            },
-            /**
-             * Normalise the search term
-             * @return {string} Normalised string
-             */
-            normalisedSearchTerm() {
-                return this.currentSearchTerm.toLowerCase();
-            },
-            /**
-             * Number of rows to be shown. Restricts value between min and max.
-             */
-            shownRowsCount() {
-                return this.rowsShown.currentCount;
-            },
-            /**
-             * Represents all options shown in the search dropdown. Contains all unique config keys
-             */
-            autocompletionData() {
-                let configKeys = [];
-                this.folds.forEach(fold => { // iterate folds
-                    fold.tested_config_list.forEach(config => { // iterate configs
-                        // flatten and add individually
-                        configKeys.push(...[].concat.apply([], Object.values(config.human_readable_config)))
-                    })
-                })
-                // make array unique
-                configKeys = [...new Set(configKeys)];
+          let first = inputString.substring(0, occuranceIndex);
+          let coloured = `<span class="markedText">${inputString.substr(occuranceIndex, occuranceSize)}</span>`;
+          let last = inputString.substring(occuranceIndex + occuranceSize);
 
-                // remove values from strings
-                configKeys = configKeys.map(value => value.split("=", 2)[0])
+          return first + coloured + last;
+        }
+        return input;
+      },
+      /**
+       * Wrapper simulating filters : x | formatNumericValue | colourSearchTerm(currentSearchTerm, searchTermColour)
+       */
+      formatTableCell(input) {
+        return this.colourSearchTerm(this.formatNumericValue(input), this.normalisedSearchTerm)
+      },
+      /**
+       * Use this function to change the numbers of shown rows.
+       * @param {Number} change Number to change row count by.
+       */
+      alterRowCount(change) {
+        let appliedChange = this.rowsShown.currentCount + change;
+        let rowCountNormalised = appliedChange < this.rowsShown.minCount ? this.rowsShown.minCount : appliedChange; // set lower bound
+        rowCountNormalised = rowCountNormalised > this.rowsShown.maxCount ? this.rowsShown.maxCount : rowCountNormalised; // set upper bound
+        this.rowsShown.currentCount = rowCountNormalised;
+      },
+      /**
+       * This function formats any normalised config into a string.
+       * @param {Object} config Expects normalised config (initially provided by {@link normalizeConfig}).
+       * @return {String} String representation of given config (contains html tags).
+       */
+      formatHRF(config) {
+        // handle parents
+        if (config.type === "parent") {
+          let childrenStrings = [];   // recursively process all children in value array
 
-                let keys = {};
-                configKeys.forEach(value => keys[value] = null);
-                return keys;
-            }
-        },
-        created() {
-            // Init row data
-            this.folds.forEach(fold => { // iterate folds
-                let foldID = fold.fold_nr;
-                fold.tested_config_list.forEach(config => { // iterate configs
-                    let configID = config.config_nr;
-                    let configString = this.formatHRF(config.human_readable_config);
-                    let metrics = this.extractMeanMetrics(config.metrics_test)
+          for (const child of config.value) {
+            childrenStrings.push(this.formatHRF(child));
+          }
 
-                    let row = { // Order: Fold#, Config#, Config string, Metrics as returned by computed#metricNames
-                        foldID,
-                        configID,
-                        configString,
-                        ...metrics
-                    };
+          // omit config.name if element is root
+          if (config.name === ":root")
+            return childrenStrings.join(", ");
 
-                    this.rawData.push(row);
-                })
-            })
-
-            // set max length for table
-            this.rowsShown.maxCount = this.rawData.length;
-        },
-        mounted() {
-            // Populate autocomplete
-            var elems = document.querySelectorAll('.autocomplete');
-            var instances = M.Autocomplete.init(elems, {data: this.autocompletionData});
+          return `<b>${config.name}:</b> [${childrenStrings.join(", ")}]`
         }
 
+        // exit recursion on value type
+        return `${config.name}=${config.value}`;
+      },
+      /**
+       * Represents all options shown in the search dropdown. Array not flattened
+       */
+      autocompletionData(normalisedConfig) {
+        let data = []
+        if (normalisedConfig.type === "parent") {
+          for (const child of normalisedConfig.value) {
+            data.push(this.autocompletionData(child));
+          }
+
+          return data;
+        }
+
+        return normalisedConfig.name;
+      }
+    },
+    computed: {
+      /**
+       * Returns normalised max shown metrics. Based on 'maxMetricCountProp'
+       */
+      maxAllowedMetrics() {
+        return this.maxMetricCount < 1 ? this.metricCount : this.maxMetricCount;
+      },
+      /**
+       * Return array of metrics limited by prop 'maxMetricCount'
+       * @return {string[]} String array of alphabetically sorted metric names
+       */
+      metricNames() {
+        let metricObject = this.folds[0].best_config.best_config_score.training.metrics;
+        return Object.keys(metricObject).sort().slice(0, this.maxAllowedMetrics);
+      },
+      /**
+       * Returns number of metrics used in analysis
+       * @return {Number} metric count
+       */
+      metricCount() {
+        let metricObject = this.folds[0].best_config.best_config_score.training.metrics;
+        return Object.keys(metricObject).length;
+      },
+      /**
+       * Normalise the search term
+       * @return {string} Normalised string
+       */
+      normalisedSearchTerm() {
+        return this.currentSearchTerm.toLowerCase();
+      },
+      /**
+       * Number of rows to be shown. Restricts value between min and max.
+       */
+      shownRowsCount() {
+        return this.rowsShown.currentCount;
+      }
+    },
+    created() {
+      // Init row data
+      this.folds.forEach(fold => { // iterate folds
+        let foldID = fold.fold_nr;
+        fold.tested_config_list.forEach(config => { // iterate configs
+          let configID = config.config_nr;
+          let configString = this.formatHRF(normalizeConfig(config.human_readable_config));
+          let metrics = this.extractMeanMetrics(config.metrics_test)
+
+          let row = { // Order: Fold#, Config#, Config string, Metrics as returned by computed#metricNames
+            foldID,
+            configID,
+            configString,
+            ...metrics
+          };
+
+          this.rawData.push(row);
+        })
+      })
+
+      // set max length for table
+      this.rowsShown.maxCount = this.rawData.length;
+    },
+    mounted() {
+      // Populate autocomplete
+      var elems = document.querySelectorAll('.autocomplete');
+      let res = this.autocompletionData(normalizeConfig(this.folds[0].best_config.human_readable_config));
+      // flatten res TODO cleanup!! Consider giving recusion function output array arg to avoid having to flatten
+      let flatten = (arr) => {
+        return arr.reduce(function (flat, toFlatten) {
+          return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+        }, []);
+      };
+      res = flatten(res);
+      let autoCompleteData = {};
+      res.forEach(e => autoCompleteData[e] = null);
+
+      var instances = M.Autocomplete.init(elems, {
+        data: autoCompleteData
+      });
     }
+
+  }
 </script>
 
 <style>
