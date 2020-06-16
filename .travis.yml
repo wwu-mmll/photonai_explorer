@@ -1,4 +1,7 @@
-matrix:
+language: node_js
+os: linux
+dist: bionic
+jobs:
   include:
     - language: node_js
       os: linux
