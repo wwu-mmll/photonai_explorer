@@ -20,6 +20,7 @@ matrix:
       install:
         - npm install
         - go get -u github.com/gobuffalo/packr/packr
+        - go get -u github.com/akavel/rsrc
       script:
         - npm run lint
         - npm run build
@@ -27,6 +28,8 @@ matrix:
         - cp -r ../dist/ ./dist/
         - $GOPATH/bin/packr
         - go build -o photon_explorer .
+        - rsrc -manifest photon_explorer.manifest
+        - env GOOS=windows GOARCH=amd64 go build -ldflags="-H windowsgui" -o photon_explorer.exe .
     - language: go
       os: osx
       go: 1.14.x
