@@ -9,22 +9,30 @@
 
 
     <div class="row">
-      <div class="col s7">
+      <div class="col m7 s12">
         <h2>Best Hyperparameter configuration</h2>
         <BestConfigDiagram :config-dict="file.best_config.human_readable_config"></BestConfigDiagram>
       </div>
-      <div class="col s4 offset-s1">
-        <h2>Optimization Progress</h2>
+      <div class="col m4 offset-m1 s12">
+        <h2>Cross Validation</h2>
+        <p><b>Outer Fold:</b> {{ file.hyperpipe_info.cross_validation.OuterCV }}</p>
+        <p><b>Inner Fold:</b> {{ file.hyperpipe_info.cross_validation.InnerCV }}</p>
       </div>
     </div>
 
     <div class="row">
-      <div class="col s7">
+      <div class="col s12">
         <h2>Performance</h2>
         <PerformancePlots :file="file"></PerformancePlots>
       </div>
-      <div class="col s4 offset-s1">
-        <h2 class="left-align">Confusion matrix</h2>
+
+    </div>
+    <div class="row">
+      <div class="col m6 s12">
+        <h2>Confusion matrix</h2>
+      </div>
+      <div class="col m5 offset-m1 s12">
+        <h2>Optimization Progress</h2>
       </div>
     </div>
 
@@ -38,11 +46,6 @@
         </div>
         <FoldTable style="float: none" v-show="showFoldTable" :best-config-metric="file.hyperpipe_info.best_config_metric"
                    :bestFoldMetrics="file.best_config.best_config_score.validation.metrics" :folds="file.outer_folds" :max-metric-count="99"></FoldTable>
-      </div>
-      <div class="col s4 offset-s1">
-        <h2>Cross Validation</h2>
-        <p><b>Outer Fold:</b> {{ file.hyperpipe_info.cross_validation.OuterCV }}</p>
-        <p><b>Inner Fold:</b> {{ file.hyperpipe_info.cross_validation.InnerCV }}</p>
       </div>
     </div>
 
