@@ -1,33 +1,37 @@
 <template>
   <div class="viz">
-    <h3 class="left-align">{{ pipeName }}</h3>
-    <h5 class="left-align">{{ pipeDate }}</h5>
-    <br>
+    <div class="vizHeader row">
+      <div class="col s12">
+        <h1>{{ pipeName }}</h1>
+        <h5>{{ pipeDate }}</h5>
+      </div>
+    </div>
+
 
     <div class="row">
-      <div class="col s8">
-        <h4 class="left-align">Best config diagram</h4>
+      <div class="col s7">
+        <h2>Best Hyperparameter configuration</h2>
         <BestConfigDiagram :config-dict="file.best_config.human_readable_config"></BestConfigDiagram>
       </div>
-      <div class="col s4">
-        <h4 class="left-align">HP Optimisation</h4>
+      <div class="col s4 offset-s1">
+        <h2>Optimization Progress</h2>
       </div>
     </div>
 
     <div class="row">
-      <div class="col s8">
-        <h4 class="left-align">Performance</h4>
+      <div class="col s7">
+        <h2>Performance</h2>
         <PerformancePlots :file="file"></PerformancePlots>
       </div>
-      <div class="col s4">
-        <h4 class="left-align">Confusion matrix</h4>
+      <div class="col s4 offset-s1">
+        <h2 class="left-align">Confusion matrix</h2>
       </div>
     </div>
 
     <div class="row">
-      <div class="col s8">
-        <div class="header">
-          <h4>Fold Information</h4>
+      <div class="col s7">
+        <div class="configItemHeader">
+          <h2>Fold Information</h2>
           <a @click="showFoldTable = !showFoldTable" href="#" class="btn-flat expansionBtn">
             <i class="material-icons" style="font-size: 3rem">{{ foldInfoButtonText }}</i>
           </a>
@@ -35,10 +39,10 @@
         <FoldTable style="float: none" v-show="showFoldTable" :best-config-metric="file.hyperpipe_info.best_config_metric"
                    :bestFoldMetrics="file.best_config.best_config_score.validation.metrics" :folds="file.outer_folds" :max-metric-count="99"></FoldTable>
       </div>
-      <div class="col s4">
-        <h4 class="left-align">Cross Validation</h4>
-        <p class="left-align"><b>Outer Fold CV:</b> {{ file.hyperpipe_info.cross_validation.OuterCV }}</p>
-        <p class="left-align"><b>Inner Fold CV:</b> {{ file.hyperpipe_info.cross_validation.InnerCV }}</p>
+      <div class="col s4 offset-s1">
+        <h2>Cross Validation</h2>
+        <p><b>Outer Fold:</b> {{ file.hyperpipe_info.cross_validation.OuterCV }}</p>
+        <p><b>Inner Fold:</b> {{ file.hyperpipe_info.cross_validation.InnerCV }}</p>
       </div>
     </div>
 
@@ -97,29 +101,25 @@
 </script>
 
 <style scoped>
-  .header {
-    display: flex;
-    justify-content: space-between;
-  }
 
-  a.btn {
-    background-color: var(--photon-gray);
+  .vizHeader h1{
+    margin-bottom: 5px;
+  }
+  .vizHeader{
+    margin-bottom: 20px;
   }
 
   a.expansionBtn {
     margin-top: 1.52rem;
-    background-color: white;
   }
 
   .configTable {
     margin-top: 100px;
   }
-
-  img {
-    max-width: 400px;
+  .configItemHeader{
+    display: flex;
+    justify-content: space-between;
   }
 
-  p {
-    font-size: medium;
-  }
+
 </style>

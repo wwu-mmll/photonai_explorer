@@ -1,11 +1,13 @@
 <template>
-  <div class="testedConfigTable">
-    <div class="row">
-      <h4 class="col s12 m6 left-align">Tested Configurations</h4>
-      <h4 class="col s6 offset-m2 m2" style="display: inline">Search:</h4>
-      <div class="input-field"> <!-- TODO: Use flexbox like in Vis header style -->
-        <input autocomplete="off" id="autocomplete-input" v-model.lazy="currentSearchTerm" v-model="currentSearchTerm"
-               class="col s6 m2 autocomplete no-autoinit" style="margin-top: 1em" type="text">
+  <div class="col s12">
+    <div class="testedConfigTable row" style="margin-bottom: 0px">
+      <h2 class="col s12 m6 left-align">Tested Configurations</h2>
+      <div class="col s6 offset-m2 m4 searchBox">
+        <h2>Search:</h2>
+        <div class="input-field">
+          <input autocomplete="off" id="autocomplete-input" v-model.lazy="currentSearchTerm" v-model="currentSearchTerm"
+                 class="autocomplete no-autoinit" type="text">
+        </div>
       </div>
     </div>
 
@@ -13,23 +15,6 @@
       Warning: Due to size restrictions this table is only showing {{ metricNames.length }} of {{
       metricCount }} supplied metrics!
     </p>
-
-    <div class="tableControllers">
-      <a class="btn tooltipped" data-position="bottom" data-tooltip="Min (5)"
-         @click="alterRowCount(Number.MIN_SAFE_INTEGER)">
-        <i class="material-icons">first_page</i>
-      </a>
-      <a class="btn tooltipped" data-position="bottom" data-tooltip="Less (5)" @click="alterRowCount(-5)">
-        <i class="material-icons">chevron_left</i>
-      </a>
-      <a class="btn tooltipped" data-position="bottom" data-tooltip="More (5)" @click="alterRowCount(5)">
-        <i class="material-icons">chevron_right</i>
-      </a>
-      <a class="btn tooltipped" data-position="bottom" :data-tooltip="'Max (' + rowsShown.maxCount + ')'"
-         @click="alterRowCount(Number.MAX_SAFE_INTEGER)">
-        <i class="material-icons">last_page</i>
-      </a>
-    </div>
 
     <table class="responsive-table">
       <thead>
@@ -57,7 +42,27 @@
       </tr>
       </tbody>
     </table>
+
+    <div class="tableControllers">
+      <a class="btn tooltipped" data-position="bottom" data-tooltip="Min (5)"
+         @click="alterRowCount(Number.MIN_SAFE_INTEGER)">
+        <i class="material-icons">fast_rewind</i>
+      </a>
+      <a class="btn tooltipped" data-position="bottom" data-tooltip="Less (5)" @click="alterRowCount(-5)">
+        <i class="material-icons">arrow_upward</i>
+      </a>
+      <a class="btn tooltipped" data-position="bottom" data-tooltip="More (5)" @click="alterRowCount(5)">
+        <i class="material-icons">arrow_downward</i>
+      </a>
+      <a class="btn tooltipped" data-position="bottom" :data-tooltip="'Max (' + rowsShown.maxCount + ')'"
+         @click="alterRowCount(Number.MAX_SAFE_INTEGER)">
+        <i class="material-icons">fast_forward</i>
+      </a>
+    </div>
+
   </div>
+
+
 </template>
 
 <script>
@@ -295,9 +300,21 @@
     background-color: var(--photon-light-blue);
   }
 
-  a.btn {
-    background-color: var(--photon-gray);
-    transition-property: background-color;
-    margin-right: 15px;
+  .searchBox h2{
+    float: left;
+  }
+  .searchBox .input-field{
+    display: block;
+    float: left;
+    margin-left: 1em;
+    margin-top: 1em;
+
+  }
+  .tableControllers{
+    margin-top: 20px;
+    font-size: 1em;
+  }
+  .configTable table{
+    color: var(--photon-dark);
   }
 </style>

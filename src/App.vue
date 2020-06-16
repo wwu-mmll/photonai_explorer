@@ -5,15 +5,15 @@
     <div class="navbar-fixed">
       <nav>
         <div class="nav-wrapper">
-          <a @click="pageNo = -1" href="#" class="left logoText">PHOTON Explorer</a>
-          <hr v-show="files.length !== 0" class="separatorMain">
+
+          <!--<hr v-show="files.length !== 0" class="separatorMain">-->
           <ul id="nav-mobile" class="hide-on-med-and-down">
             <li v-for="(file, index) in files" :key="index">
               <a style="display: inline-block" href="#" @click="pageNo = index">{{ file.name }}</a>
               <a @click="removeFile(file)" class="btn-flat"><i class="material-icons">close</i></a>
-              <hr v-show="index !== files.length - 1" class="separatorMinor">
             </li>
           </ul>
+          <a @click="pageNo = -1" href="#" class="right photon-logo">PHOTON<span class="ai">AI</span></a>
         </div>
       </nav>
     </div>
@@ -68,62 +68,3 @@
         }
     }
 </script>
-
-<style scoped>
-  #app {
-    font-family: "Oxygen-Regular", "Avenir", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: var(--photon-light);
-  }
-
-  nav .logoText {
-    padding-left: 10px;
-    font-size: 2.1rem;
-  }
-
-  nav .logo {
-    vertical-align: middle;
-    max-height: 3rem;
-  }
-
-  nav .separatorMain {
-    display: inline;
-    vertical-align: middle;
-    float: left;
-    height: 3rem;
-    border-color: var(--photon-light);
-    margin-left: 10px;
-  }
-
-  nav .separatorMinor {
-    display: inline;
-    border-color: var(--photon-gray);
-  }
-
-  nav {
-    background-color: var(--photon-purple);
-  }
-
-  .content {
-    color: black;
-    margin: auto;
-    width: 90%;
-  }
-
-  .centered {
-    position: absolute;
-    margin: auto;
-    top: 33%;
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
-
-  li .btn-flat {
-    margin: 0;
-    padding-left: 0;
-    color: inherit;
-  }
-</style>

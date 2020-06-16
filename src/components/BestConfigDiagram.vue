@@ -2,7 +2,8 @@
   <div class="bestConfigDiagram">
     <div class="elemWrapper" v-for="(elem, index) in configList" :key="index">
       <BestConfigElement :configDict="elem" :depth="0"></BestConfigElement>
-      <i v-if="(index + 1) !== configList.length" class="material-icons medium">arrow_forward</i>
+      <i v-if="(index + 1) !== configList.length" class="material-icons"
+         style="margin-top: 5px;">arrow_forward</i>
     </div>
     <div style="clear:both;"></div>
   </div>

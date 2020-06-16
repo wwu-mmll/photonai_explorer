@@ -10,8 +10,12 @@
       <div id="bgpic"></div>
     </div>
     <div class="filemanager container">
-      <FileAcceptor :files="files" :update-callback="updateCallback"></FileAcceptor>
-      <h3 v-show="files.length === 0">Drag a suitable .json file into the box above to begin.</h3>
+      <div class="row">
+        <div class="col s8">
+            <FileAcceptor :files="files" :update-callback="updateCallback"></FileAcceptor>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>

@@ -1,13 +1,13 @@
 <template>
   <div>
-    <p v-if="bestFoldMetrics.length !== getMetricNames.length" style="color: var(--photon-explorer-dark-pink)">
+    <p v-if="bestFoldMetrics.length < getMetricNames.length" style="color: var(--photon-explorer-dark-pink)">
       Warning: Due to size restrictions this table is only showing {{ getMetricNames.length }} of {{
       Object.keys(bestFoldMetrics).length }} supplied metrics!
     </p>
     <table class="foldTable centered">
       <thead>
       <tr>
-        <th>Fold #</th>
+        <th>Outer Fold #</th>
         <th v-for="(metricName, index) in getMetricNames" :key="index"
             :class="{ bestConfigMetric: metricName === bestConfigMetric }">
           {{metricName}}
@@ -17,7 +17,7 @@
       <tbody v-for="(fold, index) in folds" :key="index">
       <tr @click="toggleRowExpansion(index)"
           :class="{ bestFold: metricsEqual(fold.best_config.best_config_score.validation.metrics, bestFoldMetrics) }">
-        <td>Fold {{ fold.fold_nr }}</td>
+        <td>{{ fold.fold_nr }}</td>
         <td v-for="(metricName, index) in getMetricNames" :key="index">
           {{fold.best_config.best_config_score.validation.metrics[metricName] | formatMetric}}
         </td>
@@ -107,5 +107,8 @@
 
   .bestConfigMetric {
     color: var(--photon-light-blue);
+  }
+  .foldTable td{
+    padding: 7px;
   }
 </style>

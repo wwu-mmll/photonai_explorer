@@ -94,7 +94,7 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
       y1: dummyResult,
       line: {
         color: "rgb(210,22,22)",
-        width: 4
+        width: 2
       }
     })
 

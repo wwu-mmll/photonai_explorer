@@ -1,5 +1,5 @@
 <template>
-  <div class="performancePlots">
+  <div class="performancePlots row">
     <Plot v-for="(value, key) in plotData" :key="key" :plot-data="value"></Plot>
   </div>
 </template>

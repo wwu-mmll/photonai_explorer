@@ -1,8 +1,16 @@
 <template> 
-  <div class="bestConfigElement" :style="darkeningStyle">
-    <p class="header"><u>{{ configDict.name }}</u></p>
-    <p class="simpleContent" v-for="(child, index) in simpleChildren" :key="index">{{child.name}} = {{child.value}}</p>
-    <hr v-if="complexChildren.length > 0">
+  <div
+       v-bind:class="[depth == 0 ? 'fixedWidth' : '', 'bestConfigElement']"
+        :style="darkeningStyle">
+    <p v-bind:class="[complexChildren.length > 0 ?  'configItemHeaderComplex': 'configItemHeader']">
+      {{ configDict.name }}
+    </p>
+    <div class="simpleContent" v-for="(child, index) in simpleChildren" :key="index">
+      <div >
+        <div class="col m8 simpleContentKey truncate"><p>{{child.name}}</p></div>
+        <div class="col m4 simpleContentValue truncate"><p>{{croppedValue(child.value)}}</p></div>
+      </div>
+    </div>
     <div class="complexWrapper">
       <BestConfigElement v-for="(child, index) in complexChildren" :key="index" :config-dict="child" :depth="depth + 1"></BestConfigElement>
     </div>
@@ -22,13 +30,31 @@ export default {
       complexChildren: []     // Objects of type 'parent' -> further recursion
     }
   },
+  methods:{
+    croppedValue(val){
+      if (isNaN(val))
+      {
+        return val;
+      }
+      else{
+        let nr = Number(val)
+        if (Number.isInteger(nr))
+        {
+          return val;
+        }
+        else{
+          return Number(val).toFixed(4).toString();
+        }
+      }
+    }
+  },
   computed: {
     /**
      * Darken element by 10% every depth level
      */
     darkeningStyle() {
       return {filter: `brightness(${100 - 10 * this.depth}%)`};
-    }
+    },
   },
   created() {
     // separate simple from complex children
@@ -44,34 +70,49 @@ export default {
 
 <style scoped>
   .bestConfigElement {
-    background-color: var(--photon-blue);
+    background-color: var(--photon-white);
     float: left;
+
+    padding: 5px 15px 15px 15px;
+  }
+  .fixedWidth{
+    min-width: 230px;
   }
 
-  .header {
-    margin-left: 1em;
-    margin-right: 1em;
-    margin-block-start: .5em;
+  .configItemHeader {
+    font-weight: bold;
+    margin: 5px 0px 5px 0px;
+  }
+  .configItemHeaderComplex{
+    margin: 5px 0px 5px 0px;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    color: var(--photon-gray);
   }
 
   .simpleContent {
-    margin-left: 1em;
-    margin-right: 1em;
-    margin-block-start: 0;
-    margin-block-end: .5em;
-
     text-align: left;
+    min-height: 15px;
+  }
+  .simpleContent p{
+    margin: 0px;
+  }
+  .simpleContentKey{
+    font-style: italic;
+    text-align: right;
+  }
+  .simpleContentValue p{
+    margin-left: 10px;
+    font-size: 0.85rem;
+    padding-top: 3px;
   }
 
   hr {
-    margin-left: 1em;
-    margin-right: 1em;
-    border: 1px solid var(--photon-very-dark);
+    border: 1px solid var(--photon-gray);
+    margin: 0px;
   }
 
   .complexWrapper > .bestConfigElement {
-    margin-left: 1em;
-    margin-right: 1em;
     float: none;
   }
 </style>
