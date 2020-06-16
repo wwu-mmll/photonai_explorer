@@ -25,3 +25,17 @@ matrix:
         - cp -r ../dist/ ./dist/
         - $GOPATH/bin/packr
         - go build -o photon_explorer .
+    - language: go
+      os: osx
+      go: 1.14.x
+      node_js: 12
+      install:
+        - npm install
+        - go get -u github.com/gobuffalo/packr/packr
+      script:
+        - npm run lint
+        - npm run build
+        - cd photonai-explorer-serv/
+        - cp -r ../dist/ ./dist/
+        - $GOPATH/bin/packr
+        - go build -o photon_explorer_mac .
