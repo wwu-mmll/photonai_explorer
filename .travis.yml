@@ -1,6 +1,8 @@
 matrix:
   include:
     - language: node_js
+      os: linux
+      dist: bionic
       node_js: 12
       install:
         - npm install
