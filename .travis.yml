@@ -41,7 +41,7 @@ jobs:
       deploy:
         provider: script
         skip_cleanup: true
-        script: "rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' $TRAVIS_BUILD_DIR/photonai-explorer-serv/{photonai_explorer,photonai_explorer.exe} $SSHUSER@$SSHSERVER:/"
+        script: "rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' $TRAVIS_BUILD_DIR/photonai-explorer-serv/ $SSHUSER@$SSHSERVER:/asd/"
         on:
           branch: feature/add_deployment
     - language: go
@@ -56,7 +56,7 @@ jobs:
           update: true
       before_install:
         - eval "$(ssh-agent -s)"
-        - echo $SSHKEY | base64 -d > /tmp/sshkey
+        - echo $SSHKEY | base64 -D > /tmp/sshkey
         - chmod 600 /tmp/sshkey
         - ssh-add /tmp/sshkey
         - npm install --global create-dmg
