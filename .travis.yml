@@ -18,6 +18,8 @@ jobs:
       go: 1.14.x
       node_js: 12
       before_install:
+        - eval "$(ssh-agent -s)"
+        - ssh-add <(echo $SSHKEY | base64 -d)
         - sudo apt update
         - sudo apt-get -y install gcc libgtk-3-dev libappindicator3-dev webkit2gtk-4.0
       install:
@@ -34,6 +36,10 @@ jobs:
         - go build -o photonai_explorer .
         - rsrc -manifest photonai_explorer.manifest
         - env GOOS=windows GOARCH=amd64 go build -ldflags="-H windowsgui" -o photonai_explorer.exe .
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: "rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' $TRAVIS_BUILD_DIR/photonai-explorer-serv/{photonai_explorer,photonai_explorer.exe} SSHUSER@SSHSERVER:/"
     - language: go
       os: osx
       go: 1.14.x
@@ -45,6 +51,8 @@ jobs:
             - imagemagick
           update: true
       before_install:
+        - eval "$(ssh-agent -s)"
+        - ssh-add <(echo $SSHKEY | base64 -d)
         - npm install --global create-dmg
       install:
         - npm install
@@ -59,4 +67,7 @@ jobs:
         - go build -o ./.build-mac/PHOTONAI\ Explorer.app/Contents/MacOS/photonai_explorer_mac .
         - cd ./.build-mac/
         - create-dmg PHOTONAI\ Explorer.app || a=$?; if [ $a -eq 2 ]; then return 0; else return $a; fi # ignore error code 2
-
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: "rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' $TRAVIS_BUILD_DIR/photonai-explorer-serv/.build-mac/ SSHUSER@SSHSERVER:/"
