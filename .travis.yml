@@ -43,6 +43,7 @@ jobs:
           packages:
             - graphicsmagick
             - imagemagick
+          update: true
       before_install:
         - npm install --global create-dmg
       install:
