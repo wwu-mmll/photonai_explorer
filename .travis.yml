@@ -42,6 +42,8 @@ jobs:
         provider: script
         skip_cleanup: true
         script: "rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' $TRAVIS_BUILD_DIR/photonai-explorer-serv/{photonai_explorer,photonai_explorer.exe} SSHUSER@SSHSERVER:/"
+        on:
+          branch: feature/add_deployment
     - language: go
       os: osx
       go: 1.14.x
@@ -75,3 +77,5 @@ jobs:
         provider: script
         skip_cleanup: true
         script: "rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' $TRAVIS_BUILD_DIR/photonai-explorer-serv/.build-mac/ SSHUSER@SSHSERVER:/"
+        on:
+          branch: feature/add_deployment
