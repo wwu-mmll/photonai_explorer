@@ -40,6 +40,7 @@ jobs:
         - env GOOS=windows GOARCH=amd64 go build -ldflags="-H windowsgui" -o photonai_explorer.exe .
       deploy:
         provider: script
+        skip_cleanup: true
         script: "rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' $TRAVIS_BUILD_DIR/photonai-explorer-serv/{photonai_explorer,photonai_explorer.exe} $SSHUSER@$SSHSERVER:/"
         on:
           branch: feature/add_deployment
@@ -74,6 +75,7 @@ jobs:
         - create-dmg PHOTONAI\ Explorer.app || a=$?; if [ $a -eq 2 ]; then return 0; else return $a; fi # ignore error code 2
       deploy:
         provider: script
+        skip_cleanup: true
         script: "rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' $TRAVIS_BUILD_DIR/photonai-explorer-serv/.build-mac/ $SSHUSER@$SSHSERVER:/"
         on:
           branch: feature/add_deployment
