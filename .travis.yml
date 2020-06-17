@@ -54,7 +54,7 @@ jobs:
         - npm run build
         - cd photonai-explorer-serv/
         - rm -r ./dist/
-        - cp -r ../dist/* ./dist/
+        - cp -r ../dist/ ./dist/
         - $GOPATH/bin/packr
         - go build -o ./.build-mac/PHOTONAI\ Explorer.app/Contents/MacOS/photonai_explorer_mac .
         - cd ./.build-mac/
