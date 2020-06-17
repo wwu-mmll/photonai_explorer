@@ -28,15 +28,19 @@ jobs:
         - npm run lint
         - npm run build
         - cd photonai-explorer-serv/
+        - rm -r ./dist/
         - cp -r ../dist/ ./dist/
         - $GOPATH/bin/packr
-        - go build -o photon_explorer .
-        - rsrc -manifest photon_explorer.manifest
-        - env GOOS=windows GOARCH=amd64 go build -ldflags="-H windowsgui" -o photon_explorer.exe .
+        - go build -o photonai_explorer .
+        - rsrc -manifest photonai_explorer.manifest
+        - env GOOS=windows GOARCH=amd64 go build -ldflags="-H windowsgui" -o photonai_explorer.exe .
     - language: go
       os: osx
       go: 1.14.x
       node_js: 12
+      before_install:
+        - npm install --global create-dmg
+        - brew install graphicsmagick imagemagick
       install:
         - npm install
         - go get -u github.com/gobuffalo/packr/packr
@@ -44,6 +48,10 @@ jobs:
         - npm run lint
         - npm run build
         - cd photonai-explorer-serv/
-        - cp -r ../dist/ ./dist/
+        - rm -r ./dist/
+        - cp -r ../dist/* ./dist/
         - $GOPATH/bin/packr
-        - go build -o photon_explorer_mac .
+        - go build -o ./.build-mac/PHOTONAI\ Explorer.app/Contents/MacOS/photonai_explorer_mac .
+        - cd ./.build-mac/
+        - create-dmg PHOTONAI\ Explorer.app || a=$?; if [ $a -eq 2 ]; then return 0; else return $a; fi # ignore error code 2
+
