@@ -1,4 +1,4 @@
-# PHOTONAI Explorer
+# PHOTONAI Explorer - test
 [![Build Status Travis](https://img.shields.io/travis/com/wwu-mmll/photonai-explorer)](https://travis-ci.com/github/wwu-mmll/photonai-explorer)
 [![License: AGPLv3](https://img.shields.io/github/license/wwu-mmll/photonai-explorer)](https://github.com/wwu-mmll/photonai-explorer/blob/master/LICENSE)
 [![GitHub Release](https://img.shields.io/github/release-date/wwu-mmll/photonai-explorer)](https://github.com/wwu-mmll/photonai-explorer/releases)
