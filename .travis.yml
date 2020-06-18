@@ -53,6 +53,7 @@ jobs:
             repo: wwu-mmll/photonai-explorer
             tags: true
           skip_cleanup: 'true'
+          draft: 'true'
         - provider: script
           script: "rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' $TRAVIS_BUILD_DIR/dist/ $SSHUSER@$SSHSERVER:/"
           on:
@@ -100,4 +101,5 @@ jobs:
             repo: wwu-mmll/photonai-explorer
             tags: true
           skip_cleanup: 'true'
+          draft: 'true'
 
