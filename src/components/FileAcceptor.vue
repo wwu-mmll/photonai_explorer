@@ -20,13 +20,12 @@ export default {
     addFile(e) {
       let droppedFiles = e.dataTransfer.files;
       if (!droppedFiles) return;
-      [...droppedFiles].forEach(f => {
+      droppedFiles.forEach(f => {
         // process given file
-        f.text().then(text => {
-          window.console.log(`${f.name} loaded`);
-
+        let reader = new FileReader();
+        reader.onload = () => {
           try {
-            this.files.push(JSON.parse(text));
+            this.files.push(JSON.parse(reader.result));
             this.updateCallback()
           } catch (e) {
             if (e instanceof SyntaxError) {
@@ -35,9 +34,8 @@ export default {
               throw e; // let others bubble up
             }
           }
-
-          //this.description = `${f.name} - Project: ${jsonfile["name"]}`;
-        });
+        }
+        reader.readAsText(f);
         window.console.log(`${f.name} processed`);
       });
     }

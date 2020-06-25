@@ -37,7 +37,7 @@
       <tbody>
       <tr v-for="(row, rowIndex) in getSortedTable()" :key="rowIndex">
         <td v-for="(value, name, index) in row" :key="index">
-          <span v-html="formatTableCell(value)"></span>
+          <span v-if="name !== 'tctMetadata'" v-html="formatTableCell(value)"></span>
         </td>
       </tr>
       </tbody>
@@ -67,7 +67,7 @@
 
 <script>
 
-  import {normalizeConfig} from "../preprocessing/configInterpreter"
+  import {normalizeConfig, formatHRC, getAttributes} from "../preprocessing/configInterpreter"
 
   export default {
     name: "TestedConfigTable",
@@ -117,7 +117,32 @@
        * Also controls the number of rows shown.
        */
       getSortedTable() {
-        return this.rawData.filter(row => row.configString.toLowerCase().includes(this.normalisedSearchTerm))
+        let filter = row => row.configString.toLowerCase().includes(this.normalisedSearchTerm); // default basic filter
+        let replaceAll = (target, search, replacement) => {
+          return target.replace(new RegExp(search, 'g'), replacement);
+        };
+
+        if (this.normalisedSearchTerm.startsWith("$")) {
+          // adv search
+          let evalQuery = replaceAll(this.currentSearchTerm, "\\$", "this.") // dont use normalised searach term bc some attributes are case sensitive
+
+          filter = row => {
+            let rowCopy = Object.assign({}, row); // create working copy to not mess with table creation
+            // create aliases for row config. From 'configString' to:
+            rowCopy.config = rowCopy.configString;
+            rowCopy.Config = rowCopy.configString;
+            // expose attributes
+            Object.assign(rowCopy, getAttributes(row.tctMetadata.normalisedConfig))
+            try {
+              return ((str) => eval(str)).call(rowCopy, evalQuery) // TODO remove need to write $xyz: 'this' to context without 'with' bc deprecated?
+            } catch (error) {
+              return false;
+            }
+          }
+        }
+
+        // regular text search
+        return this.rawData.filter(filter)
           .sort((a, b) => {
             let modifier = 1;
             if (this.currentSortDir === 'DESC') modifier = -1;
@@ -129,7 +154,7 @@
       /**
        * Filter that limits floating point values to 3 fraction digits and lets everything else pass.
        * @param value Value to format
-       * @return {string|*} Either formatted float or whatever was passed in.
+       * @return Either formatted float or whatever was passed in.
        */
       formatNumericValue(value) {
         if (!isNaN(parseFloat(value)) && !Number.isInteger(value)) {
@@ -174,30 +199,6 @@
         this.rowsShown.currentCount = rowCountNormalised;
       },
       /**
-       * This function formats any normalised config into a string.
-       * @param {Object} config Expects normalised config (initially provided by {@link normalizeConfig}).
-       * @return {String} String representation of given config (contains html tags).
-       */
-      formatHRF(config) {
-        // handle parents
-        if (config.type === "parent") {
-          let childrenStrings = [];   // recursively process all children in value array
-
-          for (const child of config.value) {
-            childrenStrings.push(this.formatHRF(child));
-          }
-
-          // omit config.name if element is root
-          if (config.name === ":root")
-            return childrenStrings.join(", ");
-
-          return `<b>${config.name}:</b> [${childrenStrings.join(", ")}]`
-        }
-
-        // exit recursion on value type
-        return `${config.name}=${config.value}`;
-      },
-      /**
        * Represents all options shown in the search dropdown. Array not flattened
        */
       autocompletionData(normalisedConfig) {
@@ -210,7 +211,7 @@
           return data;
         }
 
-        return normalisedConfig.name;
+        return [normalisedConfig.name, "$" + normalisedConfig.name];
       }
     },
     computed: {
@@ -256,14 +257,18 @@
         let foldID = fold.fold_nr;
         fold.tested_config_list.forEach(config => { // iterate configs
           let configID = config.config_nr;
-          let configString = this.formatHRF(normalizeConfig(config.human_readable_config));
+          let normalisedConfig = normalizeConfig(config.human_readable_config);
+          let configString = formatHRC(normalisedConfig);
           let metrics = this.extractMeanMetrics(config.metrics_test)
 
           let row = { // Order: Fold#, Config#, Config string, Metrics as returned by computed#metricNames
             foldID,
             configID,
             configString,
-            ...metrics
+            ...metrics,
+            tctMetadata: { // meta data that is not displayed in table
+              normalisedConfig
+            }
           };
 
           this.rawData.push(row);
@@ -275,19 +280,21 @@
     },
     mounted() {
       // Populate autocomplete
-      var elems = document.querySelectorAll('.autocomplete');
+      let elems = document.querySelectorAll('.autocomplete');
       let res = this.autocompletionData(normalizeConfig(this.folds[0].best_config.human_readable_config));
-      // flatten res TODO cleanup!! Consider giving recusion function output array arg to avoid having to flatten
+      // flatten res TODO cleanup!! Consider giving recursion function output array arg to avoid having to flatten
       let flatten = (arr) => {
         return arr.reduce(function (flat, toFlatten) {
           return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
         }, []);
       };
       res = flatten(res);
+      // add metrics for adv. search
+      res.push(...(this.metricNames.map(value => "$" + value)))
       let autoCompleteData = {};
       res.forEach(e => autoCompleteData[e] = null);
 
-      var instances = M.Autocomplete.init(elems, {
+      let instances = M.Autocomplete.init(elems, {
         data: autoCompleteData
       });
     }
@@ -308,8 +315,8 @@
     float: left;
     margin-left: 1em;
     margin-top: 1em;
-
   }
+
   .tableControllers{
     margin-top: 20px;
     font-size: 1em;

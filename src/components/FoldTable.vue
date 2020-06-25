@@ -8,6 +8,7 @@
       <thead>
       <tr>
         <th>Outer Fold #</th>
+        <th>Best Config</th>
         <th v-for="(metricName, index) in getMetricNames" :key="index"
             :class="{ bestConfigMetric: metricName === bestConfigMetric }">
           {{metricName}}
@@ -18,12 +19,13 @@
       <tr @click="toggleRowExpansion(index)"
           :class="{ bestFold: metricsEqual(fold.best_config.best_config_score.validation.metrics, bestFoldMetrics) }">
         <td>{{ fold.fold_nr }}</td>
+        <td><span v-html="formatConfig(fold.best_config.human_readable_config)"></span></td>
         <td v-for="(metricName, index) in getMetricNames" :key="index">
           {{fold.best_config.best_config_score.validation.metrics[metricName] | formatMetric}}
         </td>
       </tr>
       <tr v-if="rowsOpened.includes(index)">
-        <td :colspan="getMetricNames.length + 1"> <!-- +1 for Fold number column -->
+        <td :colspan="getMetricNames.length + 2"> <!-- +2 for Fold number column and config -->
           <BestConfigDiagram :configDict="fold.best_config.human_readable_config"></BestConfigDiagram>
         </td>
       </tr>
@@ -34,6 +36,9 @@
 
 <script>
   import BestConfigDiagram from "./BestConfigDiagram"
+  import {normalizeConfig, formatHRC} from "../preprocessing/configInterpreter";
+
+
   export default { // TODO: fix metric # restriction message: See TestedConfigTable for reference
     name: "FoldTable",
     components: {
@@ -79,6 +84,12 @@
           }
         }
         return true;
+      },
+      /**
+       * Properly formats given human readable config
+       */
+      formatConfig(human_readable_config) {
+        return formatHRC(normalizeConfig(human_readable_config));
       }
     },
     computed: {

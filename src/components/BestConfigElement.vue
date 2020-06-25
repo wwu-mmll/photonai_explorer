@@ -74,6 +74,7 @@ export default {
     float: left;
 
     padding: 5px 15px 15px 15px;
+    margin-top: 5px;
   }
   .fixedWidth{
     min-width: 230px;

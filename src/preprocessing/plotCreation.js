@@ -1,7 +1,7 @@
 import { PlotlyPlot, PlotlyTrace } from "./PlotlyPlot";
 import { BestConfigTrace, BestConfigPlot } from "./BestConfigPlot";
 
-export { createPlot, plotFoldComparisonData, PlotTypes, plotPerformance };
+export { createPlot, plotFoldComparisonData, PlotTypes, plotPerformance, plotBestConfigConfusion };
 
 // Enumeration containing plot types for use in 'createPlot' function
 const PlotTypes = Object.freeze({
@@ -12,7 +12,7 @@ const PlotTypes = Object.freeze({
 });
 
 /**
- * This function interfaces with the Plot component to update data and layout variables.
+ * This function interfaces with the Plot component to update data and layout variables. TODO rethink need for this function. Seems to be a lot of logic for little reward
  * @param {Object} file Pipeline file needed for processing.
  * @param {Int} config Config controlling plot generation. For details see 'Readme.md' in src/preprocessing.
  * @returns {Object} An object of various plots and other data. Check the return documentation of the individual plot* functions for more details.
@@ -601,10 +601,10 @@ function plotShowInnerFoldConfig(file, foldNo, configIndex) {
 
 /**
  * Function generates all data needed for tested config comparison.
- * Due to its abnormal parameterisation in comparison to the other plot* functions it is not accessed through the createPlot interface.
+ * Due to its abnormal parametrisation in comparison to the other plot* functions it is not accessed through the createPlot interface.
  * @param {Object} file Object containing all needed information.
  * @param {Int} foldNo Outer fold number to be further inspected (1 based).
- * @param {Array} toCompare Array of tested config indicies to compare (0 based).
+ * @param {Array} toCompare Array of tested config indices to compare (0 based).
  * @returns An object with the following attributes: outerFold (Raw obj), plotTraining (PlotlyPlot), plotTest(PlotlyPlot), configDictList (Array)
  */
 function plotFoldComparisonData(file, foldNo, toCompare) {
@@ -657,4 +657,100 @@ function plotFoldComparisonData(file, foldNo, toCompare) {
   );
 
   return { outerFold, plotTraining, plotTest, configDictList };
+}
+
+/**
+ * Plots a confusion matrix if file.hyperpipe_info.estimation_type equals "classifier" and plots a graph otherwise
+ * @param {Object} file Object containing all needed information
+ * @returns Object containing objects 'training' and 'validation' with keys 'data' and 'layout'
+ */
+function plotBestConfigConfusion(file) {
+  let plotTraining = {data: [], layout: {title: "True/Predict for training set", paper_bgcolor: "rgba(0, 0, 0, 0)", plot_bgcolor: "rgba(0, 0, 0, 0)"}};
+  let plotValidation = {data: [], layout: {title: "True/Predict for validation set", paper_bgcolor: "rgba(0, 0, 0, 0)", plot_bgcolor: "rgba(0, 0, 0, 0)"}};
+
+  if (file.hyperpipe_info.estimation_type === "classifier") {
+    // CONFUSION MATRIX
+    let colourScale = [['0', 'rgb(255,245,240)'], ['0.2', 'rgb(254,224,210)'], ['0.4', 'rgb(252,187,161)'], ['0.5', 'rgb(252,146,114)'], ['0.6', 'rgb(251,106,74)'], ['0.7', 'rgb(239,59,44)'], ['0.8', 'rgb(203,24,29)'], ['0.9', 'rgb(165,15,21)'], ['1', 'rgb(103,0,13)']];
+    let traceTraining = {type: "heatmap", x: ["False", "True"], y: ["True", "False"], autocolorscale: false, colorScale: colourScale};
+    let traceValidation = {type: "heatmap", x: ["False", "True"], y: ["True", "False"], autocolorscale: false, colorScale: colourScale};
+
+    // function calculating the 4 areas of the heatmap
+    let calcZData = (y_true, y_pred) => {
+      let r = {};
+      if (y_true.length != y_pred.length) { // error recovery
+        r.z = [[0,1], [1,0]];
+        return r;
+      }
+
+      let truePositive = 0;
+      let trueNegative = 0;
+      let falsePositive = 0;
+      let falseNegative = 0;
+
+      for (let i = 0; i < y_true.length; i++) {
+        let yt = y_true[i];
+        let yp = y_pred[i];
+        if (yp == 1) {
+          if (yt == 1)
+            truePositive++;
+          else
+            falsePositive++;
+        } else {
+          if (yt == 1)
+            falseNegative++;
+          else
+            trueNegative++;
+        }
+      }
+      let allValues = [falseNegative, truePositive, falsePositive, trueNegative];
+      r.zmin = 4;//Math.min(...allValues);
+      r.zmax = Math.max(...allValues);
+      r.z = [[falseNegative, truePositive], [falsePositive, trueNegative]];
+      return r;
+    }
+
+    // calculate training z
+    let y_true = file.best_config.best_config_score.training.y_true;
+    let y_pred = file.best_config.best_config_score.training.y_pred;
+    traceTraining = {...traceTraining, ...calcZData(y_true, y_pred)}
+
+    // calculate validation z
+    y_true = file.best_config.best_config_score.validation.y_true;
+    y_pred = file.best_config.best_config_score.validation.y_pred;
+    traceValidation = {...traceValidation, ...calcZData(y_true, y_pred)}
+
+    plotTraining.data.push(traceTraining);
+    plotValidation.data.push(traceValidation);
+
+    // add styling
+    plotTraining.layout.xaxis = {title: 'Predicted value'};
+    plotTraining.layout.yaxis = {title: 'True value'};
+    plotValidation.layout.xaxis = {title: 'Predicted value'};
+    plotValidation.layout.yaxis = {title: 'True value'};
+
+  } else {
+    // TRUE / PRED GRAPH
+    let range = (size, startAt = 0) => {
+      return [...Array(size).keys()].map(i => i + startAt);
+    }
+
+    // Training
+    let y_true = file.best_config.best_config_score.training.y_true;
+    let y_pred = file.best_config.best_config_score.training.y_pred;
+
+    let traceTrueTraining = {name: "True", type: "scatter", x: range(y_true.length), y: y_true};
+    let tracePredictionTraining = {name: "Predicted", type: "scatter", x: range(y_pred.length), y: y_pred};
+
+    // Validation
+    y_true = file.best_config.best_config_score.validation.y_true;
+    y_pred = file.best_config.best_config_score.validation.y_pred;
+
+    let traceTrueValidation = {name: "True", type: "scatter", x: range(y_true.length), y: y_true};
+    let tracePredictionValidation = {name: "Predicted", type: "scatter", x: range(y_pred.length), y: y_pred};
+
+    plotTraining.data.push(traceTrueTraining, tracePredictionTraining);
+    plotValidation.data.push(traceTrueValidation, tracePredictionValidation);
+  }
+
+  return {training: plotTraining, validation: plotValidation}
 }

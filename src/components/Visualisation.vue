@@ -30,6 +30,7 @@
     <div class="row">
       <div class="col m6 s12">
         <h2>Confusion matrix</h2>
+        <Confusion :file="file"></Confusion>
       </div>
       <div class="col m5 offset-m1 s12">
         <h2>Optimization Progress</h2>
@@ -37,7 +38,7 @@
     </div>
 
     <div class="row">
-      <div class="col s7">
+      <div class="col s12">
         <div class="configItemHeader">
           <h2>Fold Information</h2>
           <a @click="showFoldTable = !showFoldTable" href="#" class="btn-flat expansionBtn">
@@ -59,6 +60,7 @@
   import FoldTable from "./FoldTable";
   import TestedConfigTable from "./TestedConfigTable";
   import PerformancePlots from "./PerformancePlots";
+  import Confusion from "./Confusion";
 
   export default {
     name: "NewVisualisation",
@@ -66,14 +68,15 @@
       BestConfigDiagram,
       FoldTable,
       TestedConfigTable,
-      PerformancePlots
+      PerformancePlots,
+      Confusion
     },
     props: {
       file: Object
     },
     data: function() {
       return {
-        showFoldTable: false
+        showFoldTable: true
       }
     },
     computed: {

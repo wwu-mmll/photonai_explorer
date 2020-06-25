@@ -2,7 +2,7 @@
  * File containing functions for human readable config uniformity.
  */
 
-export { normalizeConfig }
+export { normalizeConfig, formatHRC, getAttributes }
 
 /*let sampleInput = {
   "PCA": [
@@ -147,7 +147,9 @@ function normalizeConfig(human_readable_config) {
         splitPair[1] = "-"
       }
       outputPair.name = splitPair[0].trim();
-      outputPair.value = splitPair[1].trim();
+      let rawValue = splitPair[1].trim();
+      outputPair.value = (!isNaN(parseFloat(rawValue)) && !Number.isInteger(rawValue)) ? parseFloat(rawValue) : rawValue; // parse
+
 
       outputPair.type = "value"
 
@@ -163,8 +165,8 @@ function normalizeConfig(human_readable_config) {
 /**
  * Function checks if given string {@code s} contains unparsed JSON and returns an array of strings containing
  * one '=' separated key / value pair, conforming with regular syntax.
- * @param s String to be analysed
- * @return Array of corrected strings. If no unparsed JSON is found an empty array is returned
+ * @param s {String} String to be analysed
+ * @return {String[]} Array of corrected strings. If no unparsed JSON is found an empty array is returned
  */
 function correctUnparsedJSON(s) {
   let newStrings = [];
@@ -185,4 +187,57 @@ function correctUnparsedJSON(s) {
   }
 
   return newStrings;
+}
+
+/**
+ * This function formats any normalised config into a string.
+ * @param {Object} config Expects normalised config (initially provided by {@link normalizeConfig}).
+ * @return {String} String representation of given config (contains html tags).
+ */
+function formatHRC(config) {
+  // handle parents
+  if (config.type === "parent") {
+    let childrenStrings = [];   // recursively process all children in value array
+
+    for (const child of config.value) {
+      childrenStrings.push(formatHRC(child));
+    }
+
+    // omit config.name if element is root
+    if (config.name === ":root")
+      return childrenStrings.join(", ");
+
+    return `<b>${config.name}:</b> [${childrenStrings.join(", ")}]`
+  }
+
+  // exit recursion on value type
+  return `${config.name}=${config.value}`;
+}
+
+/**
+ * Returns a flat object containing all attributes as keys and their values. Duplicate keys are overwritten so you might
+ * get its 'last' version.
+ * @param config Expects normalised config (provided by {@link normalizeConfig}).
+ * @return {Object} flat object containing all attributes as keys and their values
+ */
+function getAttributes(config) {
+  let result = {};
+  getAttributesInternal(config, result);
+  return result;
+}
+
+/**
+ * Internal, recursing function to get all the attributes
+ * @param config normalised config
+ * @param result object to write results to
+ */
+function getAttributesInternal(config, result) {
+  if (config.type === "parent") {
+    for (const child of config.value) {
+      getAttributesInternal(child, result);
+    }
+  } else {
+    result[config.name] = config.value;
+  }
+
 }
