@@ -1,8 +1,8 @@
 <template>
   <div class="bestConfigDiagram">
     <div class="elemWrapper" v-for="(elem, index) in configList" :key="index">
-      <BestConfigElement :configDict="elem" :depth="1"></BestConfigElement>
-      <i v-if="(index + 1) != configList.length" class="material-icons medium">arrow_forward</i>
+      <BestConfigElement :configDict="elem" :depth="0"></BestConfigElement>
+      <i v-if="(index + 1) !== configList.length" class="material-icons" style="margin-top: 5px;">arrow_forward</i>
     </div>
     <div style="clear:both;"></div>
   </div>
@@ -11,6 +11,8 @@
 
 <script>
 import BestConfigElement from "./BestConfigElement";
+import { normalizeConfig } from "../preprocessing/configInterpreter";
+
 
 export default {
   name: "BestConfigDiagram",
@@ -33,14 +35,9 @@ export default {
     }
   },
   created() {
-    /* Convert human readable config to pattern: [{conf_name: ABC, attributes: ["key: value", ...]}, ...] */
-    for (let [key, value] of Object.entries(this.configDict)) {
-      let entry = {conf_name: key, attributes: []}
-      for (let attribute of value) {
-        entry.attributes.push(this.normaliseAttribute(attribute))
-      }
-      this.configList.push(entry)
-    }
+    /* Create normalised config and split it by :root values to supply to BestConfigElements */
+    let normalisedConfig = normalizeConfig(this.configDict);
+    this.configList = normalisedConfig.value;
   }
 };
 </script>

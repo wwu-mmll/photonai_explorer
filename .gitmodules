@@ -1,0 +1,3 @@
+[submodule "photonai-explorer-serv"]
+	path = photonai-explorer-serv
+	url = https://github.com/wwu-mmll/photonai-explorer-serv.git

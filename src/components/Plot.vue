@@ -1,5 +1,5 @@
 <template>
-  <div class="plt z-depth-1">
+  <div class="plt">
     <Plotly :data="getPlotData('data')" :layout="getPlotData('layout')" :display-mode-bar="false"></Plotly>
   </div>
 </template>
@@ -13,11 +13,16 @@ export default {
   },
   name: "Plot",
   props: {
-    plotData: Object
+    plotData: Object,
+    transparentBg: {
+      type: Boolean,
+      required: false,
+      default: true
+    }
   },
   data: function() {
     return {
-      unpackedData: {}
+      transparency: {paper_bgcolor: "rgba(0, 0, 0, 0)", plot_bgcolor: "rgba(0, 0, 0, 0)"}
     };
   },
   methods: {
@@ -25,15 +30,16 @@ export default {
     getPlotData(neededType) {
       //window.console.log('gePlotData: entry')
       let r = {}
-      if (neededType == 'data')
-        //r = this.unpackedData != {} ? this.unpackedData.data : this.unpackedData.data = this.plotData.toPlot().data;
+      if (neededType === 'data')
         r = this.plotData.toPlot().data
-      else if (neededType == 'layout')
-        //r = this.unpackedData != {} ? this.unpackedData.layout : this.unpackedData.layout = this.plotData.toPlot().layout;
-        r = this.plotData.toPlot().layout
-      //window.console.log(r)
-      if (r == {})
-        alert(`Error in Plot.vue::generatePlotData - value for parameter neededType unknown: ${neededType}`)
+      else if (neededType === 'layout') {
+        r = this.plotData.toPlot().layout;
+        if (this.transparentBg)
+          Object.assign(r, this.transparency)
+      }
+
+      if (r === {})
+        window.console.log(`Error in Plot.vue::generatePlotData - value for parameter neededType unknown: ${neededType}`)
       return r
     }
   }
@@ -42,6 +48,7 @@ export default {
 
 <style>
 .plt {
-  margin: 5px;
+  margin-right: 20px;
+  margin-bottom: 20px;
 }
 </style>

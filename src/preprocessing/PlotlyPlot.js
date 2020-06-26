@@ -16,21 +16,27 @@ class PlotlyPlot {
    * @param {Boolean} showLegend 
    */
   constructor(title, traces = [], showLegend = true) {
-    this.title = title
     this.traces = traces
-    this.showLegend = showLegend
+    this.layout = {
+      title,
+      showlegend: showLegend
+    };
   }
 
+  /**
+   * Adds any given style to the layout object
+   * @param styleName
+   * @param styleData
+   */
+  addStyle(styleName, styleData) {
+    this.layout[styleName] = styleData;
+  }
 
   toPlot() {
     return {
       data: this.traces.map(trace => trace.toTrace(true)),
-      layout: {
-        title: this.title,
-        //yaxis: {range: [-.25, 1.25]},
-        showlegend: this.showLegend
-      }
-    }
+      layout: this.layout
+    };
   }
 
 }
@@ -67,9 +73,11 @@ class PlotlyTrace {
   /**
    * Converts object into plotly acceptable object.
    * @param {Boolean} showError Should error data be shown (if available / allowed)
+   * @param {Object} additionalData Any data is fed directly into the returned trace object at root level.
+   * Useful for additional styles, instructions, ...
    * @returns {Object} Object representing trace in plotly compliant format.
    */
-  toTrace(showError) {
+  toTrace(showError, additionalData) {
     return {
       name: this.traceName,
       mode: this.mode,

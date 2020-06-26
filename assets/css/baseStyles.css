@@ -1,0 +1,211 @@
+:root {
+  --photon-blue: #2388fe;
+  --photon-purple: #231c44;
+  --photon-light: #f5f4fa;
+  --photon-dark: #1b1c2c;
+  --photon-very-dark: #0e0e1d;
+  --photon-white: #d0cffa;
+  --photon-light-blue: #a9c2fe;
+  --photon-shadow: #121123;
+  --photon-gray: #666666;
+
+  --photon-explorer-dark-pink: #c2185b;
+}
+
+th {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+@font-face {
+  font-family: "Roboto";
+  font-weight: 400;
+  font-style: normal;
+  src: url("../font/Roboto-Regular.ttf");
+}
+@font-face {
+  font-family: "Roboto";
+  font-weight: 800;
+  font-style: normal;
+  src: url("../font/Roboto-Bold.ttf");
+}
+
+@font-face {
+  font-family: "Roboto";
+  font-weight: 300;
+  font-style: normal;
+  src: url("../font/Roboto-Light.ttf");
+}
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url(../font/materialIcons.woff2) format('woff2');
+}
+
+.material-icons {
+  font-family: 'Material Icons', serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  margin: 0px 10px;
+}
+
+#app {
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: var(--photon-light);
+}
+
+body{
+  background: var(--photon-light);
+  color: var(--photon-gray);
+
+}
+
+h1, h2, h3, h4{
+  font-weight: bold;
+  text-align: left;
+  padding: 0px;
+}
+h1{
+  color: var(--photon-blue);
+  text-transform: uppercase;
+  font-size: 3rem;
+
+}
+h2{
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+h3{
+  color: var(--photon-light-blue);
+  font-size: 1.8rem;
+  line-height: 1.5;
+}
+h5{
+  font-size: 1.2rem;
+  text-align: left;
+  font-weight: 500;
+  margin-top: 0px;
+}
+
+p{
+  text-align: left;
+}
+btn, a.btn {
+  background-color: var(--photon-blue);
+  margin: 10px;
+  border-radius: 0px;
+  border: none;
+  height: auto;
+  width: auto;
+  padding: 0px 0px;
+
+}
+
+a.btn:hover{
+  background-color: var(--photon-purple);
+}
+
+.photon-logo{
+  padding-left: 30px;
+  color: #2388fe;
+  font-weight: bold;
+  margin: 0px 20px 0px 0px;
+  letter-spacing: 5px;
+  font-size: 1.2rem;
+}
+
+.ai{
+  color: var(--photon-light-blue);
+}
+.explorer-logo{
+  letter-spacing: normal;
+  color: var(--photon-blue);
+  padding-left: 10px;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 5px;
+  text-align: left;
+  font-size: 5rem;
+}
+nav .logo {
+  vertical-align: middle;
+  max-height: 3rem;
+}
+
+nav .separatorMain {
+  display: inline;
+  vertical-align: middle;
+  float: left;
+  height: 3rem;
+  border-color: var(--photon-light);
+  margin-left: 10px;
+}
+
+nav .separatorMinor {
+  display: inline;
+  border-color: var(--photon-gray);
+}
+
+nav {
+  background-color: var(--photon-very-dark);
+  background-image: url('../img/ep_naturalblack.png')
+}
+
+nav ul a.btn-flat{
+  margin: 0px 20px 0px 0px;
+  padding: 0px;
+}
+nav ul a{
+  padding: 0px 5px 0px 10px;
+}
+nav i.material-icons{
+  font-size: 15px;
+  margin-left: 0px;
+  color: #999;
+  margin-top: -7px;
+}
+.nav-wrapper{
+  margin: auto;
+  width: 90%;
+}
+.content {
+  margin: auto;
+  width: 90%;
+  color: var(--photon-dark);
+  padding-bottom: 50px;
+}
+
+
+img {
+  max-width: 400px;
+}
+
+
+li .btn-flat {
+  margin: 0;
+  padding-left: 0;
+  color: inherit;
+}
+
+.row{
+  margin-bottom: 50px;
+}
