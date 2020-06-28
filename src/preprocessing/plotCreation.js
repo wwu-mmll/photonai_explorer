@@ -1,7 +1,8 @@
-import { PlotlyPlot, PlotlyTrace } from "./PlotlyPlot";
-import { BestConfigTrace, BestConfigPlot } from "./BestConfigPlot";
+import {PlotlyPlot, PlotlyTrace} from "./PlotlyPlot";
+import {BestConfigPlot, BestConfigTrace} from "./BestConfigPlot";
+import ConfusionMatrix from "ml-confusion-matrix";
 
-export { createPlot, plotFoldComparisonData, PlotTypes, plotPerformance, plotBestConfigConfusion };
+export { createPlot, plotFoldComparisonData, PlotTypes, plotPerformance, plotBestConfigConfusion, plotOptimizerHistory };
 
 // Enumeration containing plot types for use in 'createPlot' function
 const PlotTypes = Object.freeze({
@@ -669,55 +670,35 @@ function plotBestConfigConfusion(file) {
   let plotValidation = {data: [], layout: {title: "True/Predict for validation set", paper_bgcolor: "rgba(0, 0, 0, 0)", plot_bgcolor: "rgba(0, 0, 0, 0)"}};
 
   if (file.hyperpipe_info.estimation_type === "classifier") {
-    // CONFUSION MATRIX
+    let y_trueTraining = file.best_config.best_config_score.training.y_true;
+    let y_predTraining = file.best_config.best_config_score.training.y_pred;
+    let y_trueValidation = file.best_config.best_config_score.validation.y_true;
+    let y_predValidation = file.best_config.best_config_score.validation.y_pred;
+
+    let uniqueLabels = [...new Set(y_trueTraining)].map(value => `Label ${value}`)
+    let uniqueLabelsReverse = [...new Set(y_trueTraining)].reverse().map(value => `Label ${value}`)
+
+    let confusionMatrixTraining = ConfusionMatrix.fromLabels(y_trueTraining, y_predTraining);
+    let confusionMatrixValidation = ConfusionMatrix.fromLabels(y_trueValidation, y_predValidation);
+
+    // create z data for plot
+    let flatten = (arr) => {
+      return arr.reduce(function (flat, toFlatten) {
+        return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+      }, []);
+    };
+    let matrixTraining = confusionMatrixTraining.getMatrix().reverse();
+    let matrixTrainingFlat = flatten(matrixTraining);
+    let matrixValidation = confusionMatrixValidation.getMatrix().reverse();
+    let matrixValidationFlat = flatten(matrixValidation);
+
+    let zDataTraining = {z: matrixTraining, zmin: Math.min(matrixTrainingFlat), zmax: Math.max(matrixTrainingFlat)};
+    let zDataValidation = {z: matrixValidation, zmin: Math.min(matrixValidationFlat), zmax: Math.max(matrixValidationFlat)};
+
+    // PLOT CONFUSION MATRIX
     let colourScale = [['0', 'rgb(255,245,240)'], ['0.2', 'rgb(254,224,210)'], ['0.4', 'rgb(252,187,161)'], ['0.5', 'rgb(252,146,114)'], ['0.6', 'rgb(251,106,74)'], ['0.7', 'rgb(239,59,44)'], ['0.8', 'rgb(203,24,29)'], ['0.9', 'rgb(165,15,21)'], ['1', 'rgb(103,0,13)']];
-    let traceTraining = {type: "heatmap", x: ["False", "True"], y: ["True", "False"], autocolorscale: false, colorScale: colourScale};
-    let traceValidation = {type: "heatmap", x: ["False", "True"], y: ["True", "False"], autocolorscale: false, colorScale: colourScale};
-
-    // function calculating the 4 areas of the heatmap
-    let calcZData = (y_true, y_pred) => {
-      let r = {};
-      if (y_true.length != y_pred.length) { // error recovery
-        r.z = [[0,1], [1,0]];
-        return r;
-      }
-
-      let truePositive = 0;
-      let trueNegative = 0;
-      let falsePositive = 0;
-      let falseNegative = 0;
-
-      for (let i = 0; i < y_true.length; i++) {
-        let yt = y_true[i];
-        let yp = y_pred[i];
-        if (yp == 1) {
-          if (yt == 1)
-            truePositive++;
-          else
-            falsePositive++;
-        } else {
-          if (yt == 1)
-            falseNegative++;
-          else
-            trueNegative++;
-        }
-      }
-      let allValues = [falseNegative, truePositive, falsePositive, trueNegative];
-      r.zmin = 4;//Math.min(...allValues);
-      r.zmax = Math.max(...allValues);
-      r.z = [[falseNegative, truePositive], [falsePositive, trueNegative]];
-      return r;
-    }
-
-    // calculate training z
-    let y_true = file.best_config.best_config_score.training.y_true;
-    let y_pred = file.best_config.best_config_score.training.y_pred;
-    traceTraining = {...traceTraining, ...calcZData(y_true, y_pred)}
-
-    // calculate validation z
-    y_true = file.best_config.best_config_score.validation.y_true;
-    y_pred = file.best_config.best_config_score.validation.y_pred;
-    traceValidation = {...traceValidation, ...calcZData(y_true, y_pred)}
+    let traceTraining = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataTraining, autocolorscale: false, colorScale: colourScale};
+    let traceValidation = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataValidation, autocolorscale: false, colorScale: colourScale};
 
     plotTraining.data.push(traceTraining);
     plotValidation.data.push(traceValidation);
@@ -753,4 +734,65 @@ function plotBestConfigConfusion(file) {
   }
 
   return {training: plotTraining, validation: plotValidation}
+}
+
+/**
+ * Plots the optimisation history
+ * @param {Object} file Object containing all needed information
+ */
+function plotOptimizerHistory(file) {
+  // determine best_config_metric and order
+  let bestConfigMetric = file.hyperpipe_info.best_config_metric;
+  let maximizeBestConfigMetric = file.hyperpipe_info.maximize_best_config_metric;
+  let caption = maximizeBestConfigMetric ? "Max" : "Min";
+
+  // utility range function
+  let range = (size, startAt = 0) => [...Array(size).keys()].map(i => i + startAt);
+
+  let traces = [];
+  let maxLen = 0; // length of longest optimisation trace
+  // create one current_metric_value trace and one $caption_metric_value trace for each fold - aggregate data
+  for (const fold of file.outer_folds) {
+    let data = fold.tested_config_list.map(conf =>
+      conf.metrics_test.filter(op => op.operation === "FoldOperations.MEAN" && op.metric_name === bestConfigMetric)[0].value);
+
+    let currentBest = data[0]
+    let bestData = data.map(value => {
+      if (maximizeBestConfigMetric) {
+        let v = Math.max(value, currentBest);
+        currentBest = v;
+        return v;
+      } else {
+        let v = Math.min(value, currentBest);
+        currentBest = v;
+        return v;
+      }
+    });
+
+    if (data.length > maxLen)
+      maxLen = data.length;
+
+    let traceCurrentMetricValue = {name: `F${fold.fold_nr} Performance`, type: "scatter", mode: "lines+markers", color: "rgb(214, 123, 25)", line: {shape: "hv"},
+                                   x: range(data.length, 1), y: data};
+    let traceBestMetricValue = {name: `F${fold.fold_nr} ${caption} Performance`, type: "scatter", mode: "lines+markers", color: "rgba(214, 123, 25, 0.5)", line: {shape: "hv"},
+                                x: range(data.length, 1), y: bestData};
+
+    traces.push(traceCurrentMetricValue, traceBestMetricValue);
+  }
+
+  return {
+    data: traces,
+    layout: {
+      title: "Optimizer History",
+      xaxis: {
+        title: "No of Evaluations",
+        tickvals: range(maxLen, 1)
+      },
+      yaxis: {title: bestConfigMetric},
+      showlegend: false,
+      paper_bgcolor: "rgba(0, 0, 0, 0)",
+      plot_bgcolor: "rgba(0, 0, 0, 0)"
+   }
+  }
+
 }

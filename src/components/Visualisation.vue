@@ -33,7 +33,8 @@
         <Confusion :file="file"></Confusion>
       </div>
       <div class="col m5 offset-m1 s12">
-        <h2>Optimization Progress</h2>
+        <h2>Optimization History</h2>
+        <OptimisationHistory :file="file"></OptimisationHistory>
       </div>
     </div>
 
@@ -61,6 +62,7 @@
   import TestedConfigTable from "./TestedConfigTable";
   import PerformancePlots from "./PerformancePlots";
   import Confusion from "./Confusion";
+  import OptimisationHistory from "./OptimisationHistory";
 
   export default {
     name: "NewVisualisation",
@@ -69,7 +71,8 @@
       FoldTable,
       TestedConfigTable,
       PerformancePlots,
-      Confusion
+      Confusion,
+      OptimisationHistory
     },
     props: {
       file: Object

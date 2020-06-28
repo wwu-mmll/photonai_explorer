@@ -3,8 +3,8 @@
 <template>
   <div class="landingpage">
     <div>
-      <video playsinline autoplay muted loop poster="assets/img/index_back.jpg" id="videoBackground">
-        <source src="../../assets/video/SlowMotion3.mp4" type="video/mp4">
+      <video playsinline autoplay muted loop poster="Assets/img/index_back.jpg" id="videoBackground">
+        <source src="../../Assets/video/SlowMotion3.mp4" type="video/mp4">
         Browser does not support HTML5 video.
       </video>
       <div id="bgpic"></div>
@@ -59,7 +59,7 @@
     -webkit-transform: translateX(-50%) translateY(-50%);
     transform: translateX(-50%) translateY(-50%);
     background-size: cover;
-    background: url("../../assets/img/index_back.png") no-repeat bottom center;
+    background: url("../../Assets/img/index_back.png") no-repeat bottom center;
   }
 
   div .filemanager {
