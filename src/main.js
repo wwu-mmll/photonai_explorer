@@ -4,7 +4,7 @@ import App from './App.vue'
 import 'materialize-css'
 import 'materialize-css/dist/css/materialize.min.css'
 import 'materialize-css/dist/js/materialize.min.js'
-import '../Assets/css/baseStyles.css'
+import '../assets/css/baseStyles.css'
 
 Vue.config.productionTip = false
 
