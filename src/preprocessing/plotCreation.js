@@ -94,7 +94,7 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
       x1: 1,
       y1: dummyResult,
       line: {
-        color: "rgb(210,22,22)",
+        color: "#0e0e1d",
         width: 2
       }
     })
@@ -114,8 +114,8 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
       meanValues["training"].push(foldTrain);
       meanValues["validation"].push(foldValidation);
 
-      let trainingTrace = new PlotlyTrace(`Fold ${foldIndex}`, undefined, undefined, undefined, "rgb(91,91,91)");
-      let validationTrace = new PlotlyTrace(`Fold ${foldIndex}`, undefined, undefined, undefined, "rgb(91,91,91)");
+      let trainingTrace = new PlotlyTrace(`Fold ${foldIndex}`, undefined, undefined, undefined, "#666");
+      let validationTrace = new PlotlyTrace(`Fold ${foldIndex}`, undefined, undefined, undefined, "#666");
 
       trainingTrace.x.push("Training");
       trainingTrace.y.push(foldTrain);
@@ -127,8 +127,8 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
     })
 
     // calculate mean values for bar trace
-    let meanTrainingTrace = new PlotlyTrace("Mean training", undefined, "bar", undefined, "rgb(214, 123, 25)");
-    let meanValidationTrace = new PlotlyTrace("Mean validation", undefined, "bar", undefined, "rgb(214, 123, 25)");
+    let meanTrainingTrace = new PlotlyTrace("Mean training", undefined, "bar", undefined, "#2388fe");
+    let meanValidationTrace = new PlotlyTrace("Mean validation", undefined, "bar", undefined, "#231c44");
 
     let average = (array) => array.reduce((a, b) => a + b) / array.length;
 
@@ -696,9 +696,13 @@ function plotBestConfigConfusion(file) {
     let zDataValidation = {z: matrixValidation, zmin: Math.min(matrixValidationFlat), zmax: Math.max(matrixValidationFlat)};
 
     // PLOT CONFUSION MATRIX
-    let colourScale = [['0', 'rgb(255,245,240)'], ['0.2', 'rgb(254,224,210)'], ['0.4', 'rgb(252,187,161)'], ['0.5', 'rgb(252,146,114)'], ['0.6', 'rgb(251,106,74)'], ['0.7', 'rgb(239,59,44)'], ['0.8', 'rgb(203,24,29)'], ['0.9', 'rgb(165,15,21)'], ['1', 'rgb(103,0,13)']];
-    let traceTraining = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataTraining, autocolorscale: false, colorScale: colourScale};
-    let traceValidation = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataValidation, autocolorscale: false, colorScale: colourScale};
+    let colorscaleValues = [[0, '#ffffff'], [1, '#1b1c2c']]
+    // let traceTraining = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataTraining, autocolorscale: false, colorScale: colourScale};
+    // let traceValidation = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataValidation, autocolorscale: false, colorScale: colourScale};
+    let traceTraining = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataTraining,
+                         colorscale: colorscaleValues};
+    let traceValidation = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataValidation,
+                           colorscale: colorscaleValues};
 
     plotTraining.data.push(traceTraining);
     plotValidation.data.push(traceValidation);
@@ -710,6 +714,7 @@ function plotBestConfigConfusion(file) {
     plotValidation.layout.yaxis = {title: 'True value'};
 
   } else {
+
     // TRUE / PRED GRAPH
     let range = (size, startAt = 0) => {
       return [...Array(size).keys()].map(i => i + startAt);
@@ -719,8 +724,8 @@ function plotBestConfigConfusion(file) {
     let y_true = file.best_config.best_config_score.training.y_true;
     let y_pred = file.best_config.best_config_score.training.y_pred;
 
-    let traceTrueTraining = {name: "True", type: "scatter", x: range(y_true.length), y: y_true};
-    let tracePredictionTraining = {name: "Predicted", type: "scatter", x: range(y_pred.length), y: y_pred};
+    let traceTrueTraining = {name: "True", type: "scatter", mode: 'markers', x: range(y_true.length), y: y_true};
+    let tracePredictionTraining = {name: "Predicted", type: "scatter", mode: 'markers', x: range(y_pred.length), y: y_pred};
 
     // Validation
     y_true = file.best_config.best_config_score.validation.y_true;
@@ -772,9 +777,14 @@ function plotOptimizerHistory(file) {
     if (data.length > maxLen)
       maxLen = data.length;
 
-    let traceCurrentMetricValue = {name: `F${fold.fold_nr} Performance`, type: "scatter", mode: "lines+markers", color: "rgb(214, 123, 25)", line: {shape: "hv"},
+    let traceCurrentMetricValue = {name: `Fold ${fold.fold_nr}`,
+                                   type: 'scatter',
+                                   mode: "markers",
+                                   marker: {opacity: 0.5,
+                                            color: "rgb(55, 128, 191)"},
                                    x: range(data.length, 1), y: data};
-    let traceBestMetricValue = {name: `F${fold.fold_nr} ${caption} Performance`, type: "scatter", mode: "lines+markers", color: "rgba(214, 123, 25, 0.5)", line: {shape: "hv"},
+    let traceBestMetricValue = {name: `Fold ${fold.fold_nr} ${caption}`, mode: "lines",
+                                line: {shape: "hv", color: 'rgb(0, 0, 0)'},
                                 x: range(data.length, 1), y: bestData};
 
     traces.push(traceCurrentMetricValue, traceBestMetricValue);
@@ -783,9 +793,9 @@ function plotOptimizerHistory(file) {
   return {
     data: traces,
     layout: {
-      title: "Optimizer History",
+      title: "",
       xaxis: {
-        title: "No of Evaluations",
+        title: "No of Hyperparameter Configs Tested",
         tickvals: range(maxLen, 1)
       },
       yaxis: {title: bestConfigMetric},

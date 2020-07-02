@@ -75,6 +75,7 @@ export default {
 
     padding: 5px 15px 15px 15px;
     margin-top: 5px;
+    margin-bottom: 20px;
   }
   .fixedWidth{
     min-width: 230px;

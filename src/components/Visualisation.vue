@@ -9,16 +9,12 @@
 
 
     <div class="row">
-      <div class="col m7 s12">
+      <div class="col m12 s12">
         <h2>Best Hyperparameter configuration</h2>
         <BestConfigDiagram :config-dict="file.best_config.human_readable_config"></BestConfigDiagram>
       </div>
-      <div class="col m4 offset-m1 s12">
-        <h2>Cross Validation</h2>
-        <p><b>Outer Fold:</b> {{ file.hyperpipe_info.cross_validation.OuterCV }}</p>
-        <p><b>Inner Fold:</b> {{ file.hyperpipe_info.cross_validation.InnerCV }}</p>
-      </div>
     </div>
+
 
     <div class="row">
       <div class="col s12">
@@ -28,12 +24,13 @@
 
     </div>
     <div class="row">
-      <div class="col m6 s12">
+      <div class="col m4 s12">
         <h2>Confusion matrix</h2>
         <Confusion :file="file"></Confusion>
       </div>
-      <div class="col m5 offset-m1 s12">
-        <h2>Optimization History</h2>
+      <div class="col m6 offset-m1 s12">
+        <h2>Hyperparameter Optimization Progress</h2>
+        <p> Optimizer: {{ file.hyperpipe_info.optimization.Optimizer }} with parameters {{ file.hyperpipe_info.optimization.OptimizerParams}}</p>
         <OptimisationHistory :file="file"></OptimisationHistory>
       </div>
     </div>
@@ -41,7 +38,11 @@
     <div class="row">
       <div class="col s12">
         <div class="configItemHeader">
-          <h2>Fold Information</h2>
+          <div class="fold-information">
+            <h2>Fold Information</h2>
+            <p><b>Outer Fold Split:</b> {{ file.hyperpipe_info.cross_validation.OuterCV }}</p>
+            <p><b>Inner Fold Split:</b> {{ file.hyperpipe_info.cross_validation.InnerCV }}</p>
+          </div>
           <a @click="showFoldTable = !showFoldTable" href="#" class="btn-flat expansionBtn">
             <i class="material-icons" style="font-size: 3rem">{{ foldInfoButtonText }}</i>
           </a>
@@ -49,6 +50,7 @@
         <FoldTable style="float: none" v-show="showFoldTable" :best-config-metric="file.hyperpipe_info.best_config_metric"
                    :bestFoldMetrics="file.best_config.best_config_score.validation.metrics" :folds="file.outer_folds" :max-metric-count="99"></FoldTable>
       </div>
+
     </div>
 
     <!-- One column once again -->
@@ -128,6 +130,13 @@
   .configItemHeader{
     display: flex;
     justify-content: space-between;
+  }
+
+  .fold-information p{
+    margin: 0px;
+  }
+  .fold-information{
+    margin-bottom: 20px;
   }
 
 
