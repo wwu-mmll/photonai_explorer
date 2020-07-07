@@ -696,7 +696,7 @@ const pSBC=(p,c0,c1,l)=>{
  */
 function plotBestConfigConfusion(file) {
   let plotTraining = {data: [], layout: {title: "Training", paper_bgcolor: "rgba(0, 0, 0, 0)", plot_bgcolor: "rgba(0, 0, 0, 0)"}};
-  let plotValidation = {data: [], layout: {title: "Validation", paper_bgcolor: "rgba(0, 0, 0, 0)", plot_bgcolor: "rgba(0, 0, 0, 0)"}};
+  let plotValidation = {data: [], layout: {title: "Test", paper_bgcolor: "rgba(0, 0, 0, 0)", plot_bgcolor: "rgba(0, 0, 0, 0)"}};
 
   if (file.hyperpipe_info.estimation_type === "classifier") {
     let y_trueTraining = file.best_config.best_config_score.training.y_true;
@@ -725,13 +725,14 @@ function plotBestConfigConfusion(file) {
     let zDataValidation = {z: matrixValidation, zmin: Math.min(matrixValidationFlat), zmax: Math.max(matrixValidationFlat)};
 
     // PLOT CONFUSION MATRIX
-    let colorscaleValues = [[0, '#ffffff'], [1, '#1b1c2c']]
+    let colorscaleValuesTrain = [[0, '#ffffff'], [1, '#2388fe']]
+    let colorscaleValuesTest = [[0, '#ffffff'], [1, '#231c44']]
     // let traceTraining = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataTraining, autocolorscale: false, colorScale: colourScale};
     // let traceValidation = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataValidation, autocolorscale: false, colorScale: colourScale};
     let traceTraining = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataTraining,
-                         colorscale: colorscaleValues};
+                         colorscale: colorscaleValuesTrain};
     let traceValidation = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataValidation,
-                           colorscale: colorscaleValues};
+                           colorscale: colorscaleValuesTest};
 
     plotTraining.data.push(traceTraining);
     plotValidation.data.push(traceValidation);
