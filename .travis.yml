@@ -44,7 +44,7 @@ jobs:
         - zip photonai-explorer_${TRAVIS_TAG}_windows_amd64.zip PHOTONAI-Explorer.exe
       deploy:
         - provider: releases
-          api_key:
+          token:
             secure: LfhYBIZGbVcBB7+M6KKMO2TwP5EJ4SHZZVxmYi0dyehoUvFPL7g09fpLyKzfCx85Rts3yjWcpgkKTNZsoVv3TNn6qEEKV6pXw3DJXoIB+owSuzMgLHEFWAh0cDtfzLsoN9Y+d2Qb/EVEwhmb7id91i1jCgZAlm/HnHwEXQhb1sqgHIeC/QICoQJxLc7uur5e+pjC818X96yWHEKKm8acNJV/vFNmKow7sjA1MT8iUPZo8N8D3MLXM+s23/5nT0+om4/b3/Wb6bPBcx2QNY9V5mtnPvVt3H7P1amlHea+N2JMQMQFAdMmK0JchmGpP9YCB3vQk+/aTwNN53gnKCk1b8AUO9P7QqujVkmQq5faecn8PFuDlVLzX+n97vQZgGza6JG4VqP9BS0kiRncYF1j/UVeIZ1nOZ+MvFAuVWtOo08No5jvpVLeM8p9hKf1qL8PUjrINSqX1OPgF4c3K4b9KIDR66rTQbkY3mJRV5tno5xrTuxZAZZiJXjdIZwDkMhZSF7QcXrLLTYFFTBoNi6EGjdi8Co8qiLWK6CEfaembi3ssCSzwNhnLqM7N1LJJwjJvenAH4Ea8UVxrmfnxKaYhlcpJvyddmhO/JgR2ERN9w5PVUbnmix6TCzbB/5jjYn8bF0aovoYGSZvjjo87LlSS6dugyiQNpShkO834t2It34=
           file:
             - "$TRAVIS_BUILD_DIR/photonai-explorer-serv/photonai-explorer_${TRAVIS_TAG}_linux_amd64.tar.gz"
@@ -93,7 +93,7 @@ jobs:
         - mv *.dmg photonai-explorer_${TRAVIS_TAG}_macos_amd64.dmg
       deploy:
         - provider: releases
-          api_key:
+          token:
             secure: LfhYBIZGbVcBB7+M6KKMO2TwP5EJ4SHZZVxmYi0dyehoUvFPL7g09fpLyKzfCx85Rts3yjWcpgkKTNZsoVv3TNn6qEEKV6pXw3DJXoIB+owSuzMgLHEFWAh0cDtfzLsoN9Y+d2Qb/EVEwhmb7id91i1jCgZAlm/HnHwEXQhb1sqgHIeC/QICoQJxLc7uur5e+pjC818X96yWHEKKm8acNJV/vFNmKow7sjA1MT8iUPZo8N8D3MLXM+s23/5nT0+om4/b3/Wb6bPBcx2QNY9V5mtnPvVt3H7P1amlHea+N2JMQMQFAdMmK0JchmGpP9YCB3vQk+/aTwNN53gnKCk1b8AUO9P7QqujVkmQq5faecn8PFuDlVLzX+n97vQZgGza6JG4VqP9BS0kiRncYF1j/UVeIZ1nOZ+MvFAuVWtOo08No5jvpVLeM8p9hKf1qL8PUjrINSqX1OPgF4c3K4b9KIDR66rTQbkY3mJRV5tno5xrTuxZAZZiJXjdIZwDkMhZSF7QcXrLLTYFFTBoNi6EGjdi8Co8qiLWK6CEfaembi3ssCSzwNhnLqM7N1LJJwjJvenAH4Ea8UVxrmfnxKaYhlcpJvyddmhO/JgR2ERN9w5PVUbnmix6TCzbB/5jjYn8bF0aovoYGSZvjjo87LlSS6dugyiQNpShkO834t2It34=
           file:
             - "$TRAVIS_BUILD_DIR/photonai-explorer-serv/.build-mac/photonai-explorer_${TRAVIS_TAG}_macos_amd64.dmg"
