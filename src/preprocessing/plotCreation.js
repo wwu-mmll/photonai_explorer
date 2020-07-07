@@ -1,7 +1,8 @@
-import { PlotlyPlot, PlotlyTrace } from "./PlotlyPlot";
-import { BestConfigTrace, BestConfigPlot } from "./BestConfigPlot";
+import {PlotlyPlot, PlotlyTrace} from "./PlotlyPlot";
+import {BestConfigPlot, BestConfigTrace} from "./BestConfigPlot";
+import ConfusionMatrix from "ml-confusion-matrix";
 
-export { createPlot, plotFoldComparisonData, PlotTypes, plotPerformance, plotBestConfigConfusion };
+export { createPlot, plotFoldComparisonData, PlotTypes, plotPerformance, plotBestConfigConfusion, plotOptimizerHistory };
 
 // Enumeration containing plot types for use in 'createPlot' function
 const PlotTypes = Object.freeze({
@@ -10,6 +11,10 @@ const PlotTypes = Object.freeze({
   testedConfig: 4,
   innerFoldConfig: 5
 });
+
+
+const ColorList = ['#1F77B4', '#FF7F0E', '#2CA02C', '#D62728', '#9467BD', '#8C564B',
+                   '#E377C2', '#7F7F7F', '#BCBD22', '#17BECF']
 
 /**
  * This function interfaces with the Plot component to update data and layout variables. TODO rethink need for this function. Seems to be a lot of logic for little reward
@@ -93,7 +98,7 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
       x1: 1,
       y1: dummyResult,
       line: {
-        color: "rgb(210,22,22)",
+        color: "#0e0e1d",
         width: 2
       }
     })
@@ -113,8 +118,8 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
       meanValues["training"].push(foldTrain);
       meanValues["validation"].push(foldValidation);
 
-      let trainingTrace = new PlotlyTrace(`Fold ${foldIndex}`, undefined, undefined, undefined, "rgb(91,91,91)");
-      let validationTrace = new PlotlyTrace(`Fold ${foldIndex}`, undefined, undefined, undefined, "rgb(91,91,91)");
+      let trainingTrace = new PlotlyTrace(`Fold ${foldIndex}`, undefined, undefined, undefined, "#666");
+      let validationTrace = new PlotlyTrace(`Fold ${foldIndex}`, undefined, undefined, undefined, "#666");
 
       trainingTrace.x.push("Training");
       trainingTrace.y.push(foldTrain);
@@ -126,8 +131,8 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
     })
 
     // calculate mean values for bar trace
-    let meanTrainingTrace = new PlotlyTrace("Mean training", undefined, "bar", undefined, "rgb(214, 123, 25)");
-    let meanValidationTrace = new PlotlyTrace("Mean validation", undefined, "bar", undefined, "rgb(214, 123, 25)");
+    let meanTrainingTrace = new PlotlyTrace("Mean training", undefined, "bar", undefined, "#2388fe");
+    let meanValidationTrace = new PlotlyTrace("Mean validation", undefined, "bar", undefined, "#231c44");
 
     let average = (array) => array.reduce((a, b) => a + b) / array.length;
 
@@ -659,65 +664,75 @@ function plotFoldComparisonData(file, foldNo, toCompare) {
   return { outerFold, plotTraining, plotTest, configDictList };
 }
 
+const pSBC=(p,c0,c1,l)=>{
+  let r,g,b,P,f,t,h,i=parseInt,m=Math.round,a=typeof(c1)=="string";
+  if(typeof(p)!="number"||p<-1||p>1||typeof(c0)!="string"||(c0[0]!='r'&&c0[0]!='#')||(c1&&!a))return null;
+  let pSBCr=(d)=>{
+    let n=d.length,x={};
+    if(n>9){
+      [r,g,b,a]=d=d.split(","),n=d.length;
+      if(n<3||n>4)return null;
+      x.r=i(r[3]=="a"?r.slice(5):r.slice(4)),x.g=i(g),x.b=i(b),x.a=a?parseFloat(a):-1
+    }else{
+      if(n==8||n==6||n<4)return null;
+      if(n<6)d="#"+d[1]+d[1]+d[2]+d[2]+d[3]+d[3]+(n>4?d[4]+d[4]:"");
+      d=i(d.slice(1),16);
+      if(n==9||n==5)x.r=d>>24&255,x.g=d>>16&255,x.b=d>>8&255,x.a=m((d&255)/0.255)/1000;
+      else x.r=d>>16,x.g=d>>8&255,x.b=d&255,x.a=-1
+    }return x};
+  h=c0.length>9,h=a?c1.length>9?true:c1=="c"?!h:false:h,f=pSBCr(c0),P=p<0,t=c1&&c1!="c"?pSBCr(c1):P?{r:0,g:0,b:0,a:-1}:{r:255,g:255,b:255,a:-1},p=P?p*-1:p,P=1-p;
+  if(!f||!t)return null;
+  if(l)r=m(P*f.r+p*t.r),g=m(P*f.g+p*t.g),b=m(P*f.b+p*t.b);
+  else r=m((P*f.r**2+p*t.r**2)**0.5),g=m((P*f.g**2+p*t.g**2)**0.5),b=m((P*f.b**2+p*t.b**2)**0.5);
+  a=f.a,t=t.a,f=a>=0||t>=0,a=f?a<0?t:t<0?a:a*P+t*p:0;
+  if(h)return"rgb"+(f?"a(":"(")+r+","+g+","+b+(f?","+m(a*1000)/1000:"")+")";
+  else return"#"+(4294967296+r*16777216+g*65536+b*256+(f?m(a*255):0)).toString(16).slice(1,f?undefined:-2)
+}
+
 /**
  * Plots a confusion matrix if file.hyperpipe_info.estimation_type equals "classifier" and plots a graph otherwise
  * @param {Object} file Object containing all needed information
  * @returns Object containing objects 'training' and 'validation' with keys 'data' and 'layout'
  */
 function plotBestConfigConfusion(file) {
-  let plotTraining = {data: [], layout: {title: "True/Predict for training set", paper_bgcolor: "rgba(0, 0, 0, 0)", plot_bgcolor: "rgba(0, 0, 0, 0)"}};
-  let plotValidation = {data: [], layout: {title: "True/Predict for validation set", paper_bgcolor: "rgba(0, 0, 0, 0)", plot_bgcolor: "rgba(0, 0, 0, 0)"}};
+  let plotTraining = {data: [], layout: {title: "Training", paper_bgcolor: "rgba(0, 0, 0, 0)", plot_bgcolor: "rgba(0, 0, 0, 0)"}};
+  let plotValidation = {data: [], layout: {title: "Test", paper_bgcolor: "rgba(0, 0, 0, 0)", plot_bgcolor: "rgba(0, 0, 0, 0)"}};
 
   if (file.hyperpipe_info.estimation_type === "classifier") {
-    // CONFUSION MATRIX
-    let colourScale = [['0', 'rgb(255,245,240)'], ['0.2', 'rgb(254,224,210)'], ['0.4', 'rgb(252,187,161)'], ['0.5', 'rgb(252,146,114)'], ['0.6', 'rgb(251,106,74)'], ['0.7', 'rgb(239,59,44)'], ['0.8', 'rgb(203,24,29)'], ['0.9', 'rgb(165,15,21)'], ['1', 'rgb(103,0,13)']];
-    let traceTraining = {type: "heatmap", x: ["False", "True"], y: ["True", "False"], autocolorscale: false, colorScale: colourScale};
-    let traceValidation = {type: "heatmap", x: ["False", "True"], y: ["True", "False"], autocolorscale: false, colorScale: colourScale};
+    let y_trueTraining = file.best_config.best_config_score.training.y_true;
+    let y_predTraining = file.best_config.best_config_score.training.y_pred;
+    let y_trueValidation = file.best_config.best_config_score.validation.y_true;
+    let y_predValidation = file.best_config.best_config_score.validation.y_pred;
 
-    // function calculating the 4 areas of the heatmap
-    let calcZData = (y_true, y_pred) => {
-      let r = {};
-      if (y_true.length != y_pred.length) { // error recovery
-        r.z = [[0,1], [1,0]];
-        return r;
-      }
+    let uniqueLabels = [...new Set(y_trueTraining)].map(value => `Label ${value}`)
+    let uniqueLabelsReverse = [...new Set(y_trueTraining)].reverse().map(value => `Label ${value}`)
 
-      let truePositive = 0;
-      let trueNegative = 0;
-      let falsePositive = 0;
-      let falseNegative = 0;
+    let confusionMatrixTraining = ConfusionMatrix.fromLabels(y_trueTraining, y_predTraining);
+    let confusionMatrixValidation = ConfusionMatrix.fromLabels(y_trueValidation, y_predValidation);
 
-      for (let i = 0; i < y_true.length; i++) {
-        let yt = y_true[i];
-        let yp = y_pred[i];
-        if (yp == 1) {
-          if (yt == 1)
-            truePositive++;
-          else
-            falsePositive++;
-        } else {
-          if (yt == 1)
-            falseNegative++;
-          else
-            trueNegative++;
-        }
-      }
-      let allValues = [falseNegative, truePositive, falsePositive, trueNegative];
-      r.zmin = 4;//Math.min(...allValues);
-      r.zmax = Math.max(...allValues);
-      r.z = [[falseNegative, truePositive], [falsePositive, trueNegative]];
-      return r;
-    }
+    // create z data for plot
+    let flatten = (arr) => {
+      return arr.reduce(function (flat, toFlatten) {
+        return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
+      }, []);
+    };
+    let matrixTraining = confusionMatrixTraining.getMatrix().reverse();
+    let matrixTrainingFlat = flatten(matrixTraining);
+    let matrixValidation = confusionMatrixValidation.getMatrix().reverse();
+    let matrixValidationFlat = flatten(matrixValidation);
 
-    // calculate training z
-    let y_true = file.best_config.best_config_score.training.y_true;
-    let y_pred = file.best_config.best_config_score.training.y_pred;
-    traceTraining = {...traceTraining, ...calcZData(y_true, y_pred)}
+    let zDataTraining = {z: matrixTraining, zmin: Math.min(matrixTrainingFlat), zmax: Math.max(matrixTrainingFlat)};
+    let zDataValidation = {z: matrixValidation, zmin: Math.min(matrixValidationFlat), zmax: Math.max(matrixValidationFlat)};
 
-    // calculate validation z
-    y_true = file.best_config.best_config_score.validation.y_true;
-    y_pred = file.best_config.best_config_score.validation.y_pred;
-    traceValidation = {...traceValidation, ...calcZData(y_true, y_pred)}
+    // PLOT CONFUSION MATRIX
+    let colorscaleValuesTrain = [[0, '#ffffff'], [1, '#2388fe']]
+    let colorscaleValuesTest = [[0, '#ffffff'], [1, '#231c44']]
+    // let traceTraining = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataTraining, autocolorscale: false, colorScale: colourScale};
+    // let traceValidation = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataValidation, autocolorscale: false, colorScale: colourScale};
+    let traceTraining = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataTraining,
+                         colorscale: colorscaleValuesTrain};
+    let traceValidation = {type: "heatmap", x: uniqueLabels, y: uniqueLabelsReverse, ...zDataValidation,
+                           colorscale: colorscaleValuesTest};
 
     plotTraining.data.push(traceTraining);
     plotValidation.data.push(traceValidation);
@@ -729,28 +744,109 @@ function plotBestConfigConfusion(file) {
     plotValidation.layout.yaxis = {title: 'True value'};
 
   } else {
+
     // TRUE / PRED GRAPH
     let range = (size, startAt = 0) => {
       return [...Array(size).keys()].map(i => i + startAt);
     }
 
-    // Training
-    let y_true = file.best_config.best_config_score.training.y_true;
-    let y_pred = file.best_config.best_config_score.training.y_pred;
+    for (const [idx, fold] of file.outer_folds.entries()) {
+      // Training
+      let y_true = fold.best_config.best_config_score.training.y_true;
+      let y_pred = fold.best_config.best_config_score.training.y_pred;
 
-    let traceTrueTraining = {name: "True", type: "scatter", x: range(y_true.length), y: y_true};
-    let tracePredictionTraining = {name: "Predicted", type: "scatter", x: range(y_pred.length), y: y_pred};
+      let tmp_color = ColorList[idx];
+      let traceTrueTraining = {name: "Fold "+ + idx, type: "scatter", mode: 'markers',
+        marker: {color: tmp_color},
+        x: y_pred, y: y_true};
+      // let tracePredictionTraining = {name: "Predicted", type: "scatter", mode: 'markers',
+      //   marker: {color: tmp_color},
+      //   x: range(y_pred.length), y: y_pred};
 
-    // Validation
-    y_true = file.best_config.best_config_score.validation.y_true;
-    y_pred = file.best_config.best_config_score.validation.y_pred;
+      // Validation
+      y_true = fold.best_config.best_config_score.validation.y_true;
+      y_pred = fold.best_config.best_config_score.validation.y_pred;
 
-    let traceTrueValidation = {name: "True", type: "scatter", x: range(y_true.length), y: y_true};
-    let tracePredictionValidation = {name: "Predicted", type: "scatter", x: range(y_pred.length), y: y_pred};
+      let traceTrueValidation = {name: "Fold " + idx, type: "scatter", mode: 'markers',
+        x: y_true, y: y_pred};
+      // let tracePredictionValidation = {name: "Predicted", type: "scatter", mode: 'markers',
+      //   x: range(y_pred.length), y: y_pred};
 
-    plotTraining.data.push(traceTrueTraining, tracePredictionTraining);
-    plotValidation.data.push(traceTrueValidation, tracePredictionValidation);
+      plotTraining.data.push(traceTrueTraining);
+      plotValidation.data.push(traceTrueValidation);
+    }
+
+
   }
 
   return {training: plotTraining, validation: plotValidation}
+}
+
+/**
+ * Plots the optimisation history
+ * @param {Object} file Object containing all needed information
+ */
+function plotOptimizerHistory(file) {
+  // determine best_config_metric and order
+  let bestConfigMetric = file.hyperpipe_info.best_config_metric;
+  let maximizeBestConfigMetric = file.hyperpipe_info.maximize_best_config_metric;
+  let caption = maximizeBestConfigMetric ? "Max" : "Min";
+
+  // utility range function
+  let range = (size, startAt = 0) => [...Array(size).keys()].map(i => i + startAt);
+
+  let traces = [];
+  let maxLen = 0; // length of longest optimisation trace
+  // create one current_metric_value trace and one $caption_metric_value trace for each fold - aggregate data
+  for (const [idx, fold] of file.outer_folds.entries()) {
+
+    let tmp_color = ColorList[idx];
+    let tmp_color_lightened = pSBC(0.4, tmp_color);
+
+    let data = fold.tested_config_list.map(conf =>
+      conf.metrics_test.filter(op => op.operation === "FoldOperations.MEAN" && op.metric_name === bestConfigMetric)[0].value);
+
+    let currentBest = data[0]
+    let bestData = data.map(value => {
+      if (maximizeBestConfigMetric) {
+        let v = Math.max(value, currentBest);
+        currentBest = v;
+        return v;
+      } else {
+        let v = Math.min(value, currentBest);
+        currentBest = v;
+        return v;
+      }
+    });
+
+    if (data.length > maxLen)
+      maxLen = data.length;
+
+    let traceCurrentMetricValue = {name: `Fold ${fold.fold_nr}`,
+                                   type: 'scatter',
+                                   mode: "markers",
+                                   marker: {color: tmp_color_lightened},
+                                   x: range(data.length, 1), y: data};
+    let traceBestMetricValue = {name: `Fold ${fold.fold_nr} Best`, mode: "lines",
+                                line: {shape: "hv", color: tmp_color},
+                                x: range(data.length, 1), y: bestData};
+
+    traces.push(traceCurrentMetricValue, traceBestMetricValue);
+  }
+
+  return {
+    data: traces,
+    layout: {
+      title: "",
+      xaxis: {
+        title: "No of Hyperparameter Configs Tested",
+        tickvals: range(maxLen, 1)
+      },
+      yaxis: {title: bestConfigMetric},
+      showlegend: true,
+      paper_bgcolor: "rgba(0, 0, 0, 0)",
+      plot_bgcolor: "rgba(0, 0, 0, 0)"
+   }
+  }
+
 }
