@@ -25,7 +25,7 @@ export default {
         let reader = new FileReader();
         reader.onload = () => {
           try {
-            this.files.push(JSON.parse(reader.result));
+            this.files.push(JSON.parse(reader.result.replace(/\bNaN\b/g, "null")));
             this.updateCallback()
           } catch (e) {
             if (e instanceof SyntaxError) {
