@@ -50,14 +50,14 @@ jobs:
             - "$TRAVIS_BUILD_DIR/photonai-explorer-serv/photonai-explorer_${TRAVIS_TAG}_linux_amd64.tar.gz"
             - "$TRAVIS_BUILD_DIR/photonai-explorer-serv/photonai-explorer_${TRAVIS_TAG}_windows_amd64.zip"
           on:
-            repo: wwu-mmll/photonai-explorer
+            repo: wwu-mmll/photonai_explorer
             tags: true
           skip_cleanup: 'true'
           draft: 'true'
         - provider: script
           script: "rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' $TRAVIS_BUILD_DIR/dist/ $SSHUSER@$SSHSERVER:/"
           on:
-            repo: wwu-mmll/photonai-explorer
+            repo: wwu-mmll/photonai_explorer
             tags: true
           skip_cleanup: 'true'
     - language: go
@@ -98,7 +98,7 @@ jobs:
           file:
             - "$TRAVIS_BUILD_DIR/photonai-explorer-serv/.build-mac/photonai-explorer_${TRAVIS_TAG}_macos_amd64.dmg"
           on:
-            repo: wwu-mmll/photonai-explorer
+            repo: wwu-mmll/photonai_explorer
             tags: true
           skip_cleanup: 'true'
           draft: 'true'
