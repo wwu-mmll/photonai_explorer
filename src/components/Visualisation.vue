@@ -23,14 +23,19 @@
       </div>
 
     </div>
+
     <div class="row">
-      <div class="col m4 s12">
-        <h2>Confusion matrix</h2>
+      <div class="col m8 s12">
+        <h2 v-if="file.hyperpipe_info.estimation_type=='classifier'">Confusion matrix</h2>
+        <h2 v-else>Predictions</h2>
         <Confusion :file="file"></Confusion>
       </div>
-      <div class="col m6 offset-m1 s12">
-        <h2>Hyperparameter Optimization Progress</h2>
-        <p> Optimizer: {{ file.hyperpipe_info.optimization.Optimizer }} with parameters {{ file.hyperpipe_info.optimization.OptimizerParams}}</p>
+    </div>
+
+    <div class="row">
+      <h2>Hyperparameter Optimization Progress</h2>
+      <p> Optimizer: {{ file.hyperpipe_info.optimization.Optimizer }} with parameters {{ file.hyperpipe_info.optimization.OptimizerParams}}</p>
+      <div class="col m6 s12">
         <OptimisationHistory :file="file"></OptimisationHistory>
       </div>
     </div>
