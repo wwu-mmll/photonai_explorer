@@ -73,7 +73,8 @@
     name: "TestedConfigTable",
     props: {
       folds: Array,           // An array of folds as found in file.outer_folds
-      maxMetricCount: Number  // Number of metrics shown in table. A value < 1 shows all
+      maxMetricCount: Number, // Number of metrics shown in table. A value < 1 shows all
+      hyperpipeInfo: Object,
     },
     data() {
       return {
@@ -97,7 +98,7 @@
       extractMeanMetrics(metricList) {
         let rMetrics = {};
         metricList.forEach(metric => {
-          if (metric.operation.endsWith(".MEAN") && this.metricNames.includes(metric.metric_name))
+          if (metric.operation.endsWith("mean") && this.metricNames.includes(metric.metric_name))
             rMetrics[metric.metric_name] = metric.value
         })
 
@@ -226,16 +227,15 @@
        * @return {string[]} String array of alphabetically sorted metric names
        */
       metricNames() {
-        let metricObject = this.folds[0].best_config.best_config_score.training.metrics;
-        return Object.keys(metricObject).sort().slice(0, this.maxAllowedMetrics);
+        let metricObject = this.hyperpipeInfo.metrics;
+        return metricObject.sort().slice(0, this.maxAllowedMetrics);
       },
       /**
        * Returns number of metrics used in analysis
        * @return {Number} metric count
        */
       metricCount() {
-        let metricObject = this.folds[0].best_config.best_config_score.training.metrics;
-        return Object.keys(metricObject).length;
+        return this.hyperpipeInfo.metrics.length;
       },
       /**
        * Normalise the search term
@@ -257,7 +257,7 @@
         let foldID = fold.fold_nr;
         fold.tested_config_list.forEach(config => { // iterate configs
           let configID = config.config_nr;
-          let normalisedConfig = normalizeConfig(config.human_readable_config);
+          let normalisedConfig = normalizeConfig(config.human_readable_config, this.hyperpipeInfo.elements);
           let configString = formatHRC(normalisedConfig);
           let metrics = this.extractMeanMetrics(config.metrics_test)
 
@@ -281,7 +281,8 @@
     mounted() {
       // Populate autocomplete
       let elems = document.querySelectorAll('.autocomplete');
-      let res = this.autocompletionData(normalizeConfig(this.folds[0].best_config.human_readable_config));
+      let res = this.autocompletionData(normalizeConfig(this.folds[0].best_config.human_readable_config,
+                                                        this.hyperpipeInfo.elements));
       // flatten res TODO cleanup!! Consider giving recursion function output array arg to avoid having to flatten
       let flatten = (arr) => {
         return arr.reduce(function (flat, toFlatten) {

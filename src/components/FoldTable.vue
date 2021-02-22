@@ -49,7 +49,8 @@
       folds: Array,
       bestConfigMetric: String, /* String of metric used to determine best config */
       bestFoldMetrics: Object,  /* metrics of the best fold, to identify it. These keys are used as reference for what columns to use in table */
-      maxMetricCount: Number /* this value indicates how many metrics are displayed in the table TODO: How many are good? */
+      maxMetricCount: Number, /* this value indicates how many metrics are displayed in the table TODO: How many are good? */
+      hyperpipeInfo: Object
     },
     data: function () {
       return {
@@ -89,7 +90,7 @@
        * Properly formats given human readable config
        */
       formatConfig(human_readable_config) {
-        return formatHRC(normalizeConfig(human_readable_config));
+        return formatHRC(normalizeConfig(human_readable_config, this.hyperpipeInfo.elements));
       }
     },
     computed: {
@@ -99,7 +100,7 @@
        * @return {string[]}
        */
       getMetricNames() {
-        return Object.keys(this.bestFoldMetrics).sort().slice(0, this.maxMetricCount);
+        return this.hyperpipeInfo.metrics.slice(0, this.maxMetricCount);
       }
     },
     filters: {

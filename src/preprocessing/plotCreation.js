@@ -72,7 +72,8 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
   let outputData = {};  // result data
 
   // extract metrics from dummy_results for iteration
-  Object.keys(file.outer_folds[0].dummy_results.training.metrics).forEach(metricName => {
+
+  (file.hyperpipe_info.metrics).forEach(metricName => {
     // Create empty plot
     outputData[metricName] = new PlotlyPlot(metricName, [], false);
 
@@ -85,8 +86,8 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
 
     // add dummy result
     // Extracts .MEAN value from metric list
-    let dummyValueExtractor = (metric) => file.dummy_estimator.train
-      .filter((metricObject) => metricObject.metric_name === metric && metricObject.operation.endsWith(".MEAN"))
+    let dummyValueExtractor = (metric) => file.dummy_estimator.metrics_train
+      .filter((metricObject) => metricObject.metric_name === metric && metricObject.operation.endsWith("mean"))
       .map((metricObject) => metricObject.value)[0];
 
     let dummyResult = dummyValueExtractor(metricName);
@@ -804,7 +805,7 @@ function plotOptimizerHistory(file) {
     let tmp_color_lightened = pSBC(0.4, tmp_color);
 
     let data = fold.tested_config_list.map(conf =>
-      conf.metrics_test.filter(op => op.operation === "FoldOperations.MEAN" && op.metric_name === bestConfigMetric)[0].value);
+      conf.metrics_test.filter(op => op.operation === "mean" && op.metric_name === bestConfigMetric)[0].value);
 
     let currentBest = data[0]
     let bestData = data.map(value => {

@@ -11,7 +11,8 @@
     <div class="row">
       <div class="col m12 s12">
         <h2>Best Hyperparameter configuration</h2>
-        <BestConfigDiagram :config-dict="file.best_config.human_readable_config"></BestConfigDiagram>
+        <BestConfigDiagram :config-dict="file.best_config.human_readable_config"
+                           :pipeline-structure="file.hyperpipe_info.elements"></BestConfigDiagram>
       </div>
     </div>
 
@@ -53,13 +54,16 @@
           </a>
         </div>
         <FoldTable style="float: none" v-show="showFoldTable" :best-config-metric="file.hyperpipe_info.best_config_metric"
-                   :bestFoldMetrics="file.best_config.best_config_score.validation.metrics" :folds="file.outer_folds" :max-metric-count="99"></FoldTable>
+                   :bestFoldMetrics="file.best_config.best_config_score.validation.metrics"
+                   :folds="file.outer_folds" :max-metric-count="99"
+                   :hyperpipe-info="file.hyperpipe_info" ></FoldTable>
       </div>
 
     </div>
 
     <!-- One column once again -->
-    <TestedConfigTable class="configTable" :max-metric-count="0" :folds="file.outer_folds"></TestedConfigTable>
+    <TestedConfigTable class="configTable" :max-metric-count="0"
+                       :folds="file.outer_folds" :hyperpipe-info="file.hyperpipe_info"></TestedConfigTable>
   </div>
 </template>
 
@@ -100,8 +104,13 @@
        * Returns creation date of this pipe
        */
       pipeDate() {
-        let unixTime = this.file.computation_end_time["$date"];
-        return new Date(unixTime).toLocaleString();
+        if (this.file.computation_end_time!=null){
+          let unixTime = this.file.computation_end_time["$date"];
+          return new Date(unixTime).toLocaleString();
+        }
+        else{
+          return ""
+        }
       },
       /**
        * Returns button text for expand / collapse button controlling FoldTable visibility

@@ -92,71 +92,110 @@ let sampleResult = {
   ]
 }*/
 
+function prepare_pipeline(root_object, pipeline_structure){
+  if (pipeline_structure instanceof  Object){
+    for (let [key, value] of Object.entries(pipeline_structure)) {
+      // prep entry
+      let entry = {name: key, type: "parent", value: [], class: ""};
+      if (typeof value === 'string' || value instanceof String){
+        entry["class"] = value;
+      }
+      else{
+        entry["value"] = prepare_pipeline(entry, value);
+      }
+      root_object.value.push(entry)
+    }
+  }
+  return root_object
+}
+
 /**
  * Main function to turn a human_readable_config object to a uniformly interpretable object.
  * TODO make sure multiple basic attributes of 'deeper' objects are displayed as one
  * @param human_readable_config
  */
-function normalizeConfig(human_readable_config) {
-  let output = {name: ":root", type: "parent", value: []};
+function normalizeConfig(human_readable_config, pipeline_structure) {
+  let output = {name: ":root", type: "parent", value: [], class: "Hyperpipe"};
+  let pipeline_stub = prepare_pipeline(output, pipeline_structure);
 
-  // iterate over keys
-  for (let [key, value] of Object.entries(human_readable_config)) {
-    // prep entry
-    let entry = {name: key, type: "parent", value: []};
+  // iterate over hyperparameters
+  for (let [param_key, param_value] of Object.entries(human_readable_config)) {
 
-    // iterate over array values and check for nesting / unparsed JSON. Using basic array syntax to facilitate extension
-    // during iteration in case unparsed JSON is detected
-    let valueArray = value.slice(); // Create copy to possibly extend
-    for (let i = 0; i < valueArray.length; i++) {
-      let s = valueArray[i];
-      // check for unparsed JSON. In case some is detected the new strings are appended and this iteration is skipped
-      let jsonCheck = correctUnparsedJSON(s);
-      if (jsonCheck.length > 0) {
-        valueArray.push(...jsonCheck);
-        continue;
-      }
+    // find belonging element in pipeline
+    let curr_obj = pipeline_stub;
+    (param_key.split("__")).forEach(name =>{
+      curr_obj = curr_obj.value.filter(obj => obj.name == name)[0]
+    });
 
-      let outputObject = {type: "value"}; // object to be added to final product. Default type is value
-      let outputPair = outputObject;      // object holding key/value pair. Reference will be overwritten if nesting exists
-      let splitString = s;                // String containing 'key=value'
-
-
-      if (s.includes("__")) {
-        // case: further splitting needed
-        let parents = s.split("__");  // elements 0..n-2 contain object names
-
-        let tObj = outputObject;      // "Pointer" updated as we go deeper, aka. recursion avoidance^10
-        for (let i = 0; i < parents.length - 1; i++) {
-          let nObj = {};
-          tObj.name = parents[i];
-          tObj.value = [nObj];
-          tObj.type = "parent"
-          tObj = nObj;
-        }
-
-        // set deepest object (tObj) to outputPair and set splitString to last value in __ split array
-        outputPair = tObj;
-        splitString = parents.pop();
-
-      }
-
+    (param_value).forEach(parameter =>{
+      let outputObject = {type: "value"};
       // add all values
-      let splitPair = splitString.split("=", 2);
+      let splitPair = parameter.split("=", 2);
       if (splitPair.length == 1) { // Handle standalone values
         splitPair[1] = "-"
       }
-      outputPair.name = splitPair[0].trim();
+      outputObject["name"] = splitPair[0].trim();
       let rawValue = splitPair[1].trim();
-      outputPair.value = (!isNaN(parseFloat(rawValue)) && !Number.isInteger(rawValue)) ? parseFloat(rawValue) : rawValue; // parse
+      outputObject["value"] = (!isNaN(parseFloat(rawValue)) && !Number.isInteger(rawValue)) ? parseFloat(rawValue) : rawValue; // parse
+      curr_obj.value.push(outputObject)
+    })
 
 
-      outputPair.type = "value"
-
-      entry.value.push(outputObject);
-    }
-
-    output.value.push(entry);
+    // prep entry
+    // // let entry = {name: key, type: "parent", value: []};
+    // //
+    // // // iterate over array values and check for nesting / unparsed JSON. Using basic array syntax to facilitate extension
+    // // // during iteration in case unparsed JSON is detected
+    // let valueArray = value.slice(); // Create copy to possibly extend
+    // for (let i = 0; i < valueArray.length; i++) {
+    //   let s = valueArray[i];
+    //   // check for unparsed JSON. In case some is detected the new strings are appended and this iteration is skipped
+    //   let jsonCheck = correctUnparsedJSON(s);
+    //   if (jsonCheck.length > 0) {
+    //     valueArray.push(...jsonCheck);
+    //     continue;
+    //   }
+    //
+    //   let outputObject = {type: "value"}; // object to be added to final product. Default type is value
+    //   let outputPair = outputObject;      // object holding key/value pair. Reference will be overwritten if nesting exists
+    //   let splitString =  s;                // String containing 'key=value'
+    //
+    //
+    //   if (s.includes("__")) {
+    //     // case: further splitting needed
+    //     let parents = s.split("__");  // elements 0..n-2 contain object names
+    //
+    //     let tObj = outputObject;      // "Pointer" updated as we go deeper, aka. recursion avoidance^10
+    //     for (let i = 0; i < parents.length - 1; i++) {
+    //       let nObj = {};
+    //       tObj.name = parents[i];
+    //       tObj.value = [nObj];
+    //       tObj.type = "parent"
+    //       tObj = nObj;
+    //     }
+    //
+    //     // set deepest object (tObj) to outputPair and set splitString to last value in __ split array
+    //     outputPair = tObj;
+    //     splitString = parents.pop();
+    //
+    //   }
+    //
+    //   // add all values
+    //   let splitPair = splitString.split("=", 2);
+    //   if (splitPair.length == 1) { // Handle standalone values
+    //     splitPair[1] = "-"
+    //   }
+    //   outputPair.name = splitPair[0].trim();
+    //   let rawValue = splitPair[1].trim();
+    //   outputPair.value = (!isNaN(parseFloat(rawValue)) && !Number.isInteger(rawValue)) ? parseFloat(rawValue) : rawValue; // parse
+    //
+    //
+    //   outputPair.type = "value"
+    //
+    //   entry.value.push(outputObject);
+    // }
+    //
+    // output.value.push(entry);
   }
 
   return output;

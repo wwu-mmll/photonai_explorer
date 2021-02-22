@@ -21,7 +21,8 @@ export default {
   },
   props: {
     /* Expects object from result file: outer_folds[x].best_config.human_readable_config */
-    configDict: Object
+    configDict: Object,
+    pipelineStructure: Object
   },
   data: function() {
     return {
@@ -36,7 +37,7 @@ export default {
   },
   created() {
     /* Create normalised config and split it by :root values to supply to BestConfigElements */
-    let normalisedConfig = normalizeConfig(this.configDict);
+    let normalisedConfig = normalizeConfig(this.configDict, this.pipelineStructure);
     this.configList = normalisedConfig.value;
   }
 };
