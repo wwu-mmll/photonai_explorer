@@ -7,8 +7,7 @@
     <table class="foldTable centered">
       <thead>
       <tr>
-        <th>Outer Fold #</th>
-        <th>Best Config</th>
+        <th>#</th>
         <th v-for="(metricName, index) in getMetricNames" :key="index"
             :class="{ bestConfigMetric: metricName === bestConfigMetric }">
           {{metricName}}
@@ -19,14 +18,15 @@
       <tr @click="toggleRowExpansion(index)"
           :class="{ bestFold: metricsEqual(fold.best_config.best_config_score.validation.metrics, bestFoldMetrics) }">
         <td>{{ fold.fold_nr }}</td>
-        <td><span v-html="formatConfig(fold.best_config.human_readable_config)"></span></td>
         <td v-for="(metricName, index) in getMetricNames" :key="index">
           {{fold.best_config.best_config_score.validation.metrics[metricName] | formatMetric}}
         </td>
       </tr>
       <tr v-if="rowsOpened.includes(index)">
-        <td :colspan="getMetricNames.length + 2"> <!-- +2 for Fold number column and config -->
-          <BestConfigDiagram :configDict="fold.best_config.human_readable_config"></BestConfigDiagram>
+        <td></td>
+        <td :colspan="getMetricNames.length">
+          <p>BEST HYPERPARAMETER CONFIGURATION OF FOLD {{fold.fold_nr}}</p>
+          <p v-html="formatConfig(fold.best_config.human_readable_config)"></p>
         </td>
       </tr>
       </tbody>

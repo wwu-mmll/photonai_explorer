@@ -92,7 +92,7 @@ h1{
 h2{
   text-transform: uppercase;
   font-size: 1.5rem;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
 }
 h3{
   color: var(--photon-light-blue);
@@ -208,4 +208,10 @@ li .btn-flat {
 
 .row{
   margin-bottom: 50px;
+}
+
+.description{
+  margin: 0px 0px 20px 0px;
+  padding: 0px;
+  font-style: italic;
 }

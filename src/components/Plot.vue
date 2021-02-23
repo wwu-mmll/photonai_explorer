@@ -48,7 +48,6 @@ export default {
 
 <style>
 .plt {
-  margin-right: 20px;
-  margin-bottom: 20px;
+  margin: 0px 0px -20px 0px;
 }
 </style>

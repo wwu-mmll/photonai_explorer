@@ -26,10 +26,10 @@ export default {
   },
   methods: {
     load_demo_file(){
-      let demo_json = require("../../assets/demo/regression.json")
-      this.files.push(demo_json);
-      let demo_json2 = require("../../assets/demo/classification.json")
-      this.files.push(demo_json2);
+      this.files.push(require("../../assets/demo/regression.json"));
+      this.files.push(require("../../assets/demo/ensemble.json"));
+      this.files.push(require("../../assets/demo/compare_estimators.json"));
+      this.files.push(require("../../assets/demo/branches.json"));
       this.updateCallback();
     },
     readJsonAndPush(f){

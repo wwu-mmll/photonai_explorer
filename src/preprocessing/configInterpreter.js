@@ -93,18 +93,25 @@ let sampleResult = {
 }*/
 
 function prepare_pipeline(root_object, pipeline_structure){
-  if (pipeline_structure instanceof  Object){
-    for (let [key, value] of Object.entries(pipeline_structure)) {
-      // prep entry
-      let entry = {name: key, type: "parent", value: [], class: ""};
-      if (typeof value === 'string' || value instanceof String){
-        entry["class"] = value;
-      }
-      else{
-        entry["value"] = prepare_pipeline(entry, value);
-      }
-      root_object.value.push(entry)
+
+  for (let [element_name, element_value] of Object.entries(pipeline_structure)) {
+
+    // prep entry
+    let entry = {name: element_name, type: "parent", value: [], class: ""};
+
+    let photon_element_precursor = element_name.split(":", 2)
+    if (photon_element_precursor.length > 1){
+      entry["name"] = photon_element_precursor[1];
+      entry["class"] = photon_element_precursor[0];
     }
+
+    if (typeof element_value === 'string' || element_value instanceof String){
+      entry["class"] = element_value;
+    }
+    else{
+      prepare_pipeline(entry, element_value);
+    }
+    root_object.value.push(entry);
   }
   return root_object
 }
@@ -123,11 +130,38 @@ function normalizeConfig(human_readable_config, pipeline_structure) {
 
     // find belonging element in pipeline
     let curr_obj = pipeline_stub;
-    (param_key.split("__")).forEach(name =>{
+    let splitted_param_key = param_key.split("__");
+    (splitted_param_key).forEach(name =>{
       curr_obj = curr_obj.value.filter(obj => obj.name == name)[0]
     });
 
-    (param_value).forEach(parameter =>{
+    // copy and tidy parameters
+    let valueArray = [];
+    for (let i = 0; i < param_value.length; i++) {
+      let s = param_value[i];
+      // check for unparsed JSON. In case some is detected the new strings are appended and this iteration is skipped
+      let jsonCheck = correctUnparsedJSON(s);
+      if (jsonCheck.length > 0) {
+        valueArray.push(...jsonCheck);
+        continue;
+      }
+      else{
+        valueArray.push(s);
+      }
+    }
+
+    // distribute parameters to elements
+    (valueArray).forEach(parameter =>{
+
+      let param_obj = curr_obj;
+      let splitted_param_value = parameter.split("__");
+      if (splitted_param_value.length > 1){
+        for (let i = 0; i < splitted_param_value.length - 1; i++) {
+          param_obj = param_obj.value.filter(obj => obj.name == splitted_param_value[i])[0]
+        }
+        parameter = splitted_param_value[splitted_param_value.length -1];
+      }
+
       let outputObject = {type: "value"};
       // add all values
       let splitPair = parameter.split("=", 2);
@@ -137,8 +171,9 @@ function normalizeConfig(human_readable_config, pipeline_structure) {
       outputObject["name"] = splitPair[0].trim();
       let rawValue = splitPair[1].trim();
       outputObject["value"] = (!isNaN(parseFloat(rawValue)) && !Number.isInteger(rawValue)) ? parseFloat(rawValue) : rawValue; // parse
-      curr_obj.value.push(outputObject)
+      param_obj.value.push(outputObject)
     })
+  }
 
 
     // prep entry
@@ -196,7 +231,6 @@ function normalizeConfig(human_readable_config, pipeline_structure) {
     // }
     //
     // output.value.push(entry);
-  }
 
   return output;
 }
@@ -244,9 +278,14 @@ function formatHRC(config) {
 
     // omit config.name if element is root
     if (config.name === ":root")
-      return childrenStrings.join(", ");
-
-    return `<b>${config.name}:</b> [${childrenStrings.join(", ")}]`
+      return childrenStrings.filter(el => el!="").join(", ");
+    
+    if (childrenStrings.length > 0){
+      return `<b>${config.name}.</b> [${childrenStrings.filter(el => el!="").join(", ")}]`;
+    }
+    else{
+      return '';
+    }
   }
 
   // exit recursion on value type
