@@ -72,8 +72,8 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
   let outputData = {};  // result data
 
   // extract metrics from dummy_results for iteration
-
   (file.hyperpipe_info.metrics).forEach(metricName => {
+
     // Create empty plot
     outputData[metricName] = new PlotlyPlot(metricName, [], false);
 
@@ -86,23 +86,26 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
 
     // add dummy result
     // Extracts .MEAN value from metric list
-    let dummyValueExtractor = (metric) => file.dummy_estimator.metrics_train
-      .filter((metricObject) => metricObject.metric_name === metric && metricObject.operation.endsWith("mean"))
-      .map((metricObject) => metricObject.value)[0];
 
-    let dummyResult = dummyValueExtractor(metricName);
-    shapes.push({
-      type: "line",
-      xref: "paper",
-      x0: 0,
-      y0: dummyResult,
-      x1: 1,
-      y1: dummyResult,
-      line: {
-        color: "#0e0e1d",
-        width: 2
-      }
-    })
+    if(file.outer_folds[0].dummy_results != null) {
+      let dummyValueExtractor = (metric) => file.dummy_estimator.train
+          .filter((metricObject) => metricObject.metric_name === metric && metricObject.operation.endsWith(".MEAN"))
+          .map((metricObject) => metricObject.value)[0];
+
+      let dummyResult = dummyValueExtractor(metricName);
+      shapes.push({
+        type: "line",
+        xref: "paper",
+        x0: 0,
+        y0: dummyResult,
+        x1: 1,
+        y1: dummyResult,
+        line: {
+          color: "#0e0e1d",
+          width: 2
+        }
+      })
+    }
 
     // add dummy result shapes to plot
     outputData[metricName].addStyle("shapes", shapes);
