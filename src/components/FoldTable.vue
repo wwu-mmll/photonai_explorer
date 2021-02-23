@@ -90,7 +90,7 @@
        * Properly formats given human readable config
        */
       formatConfig(human_readable_config) {
-        return formatHRC(normalizeConfig(human_readable_config, this.hyperpipeInfo.elements));
+        return formatHRC(human_readable_config);
       }
     },
     computed: {

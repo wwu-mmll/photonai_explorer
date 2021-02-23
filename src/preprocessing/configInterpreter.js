@@ -136,19 +136,7 @@ function normalizeConfig(human_readable_config, pipeline_structure) {
     });
 
     // copy and tidy parameters
-    let valueArray = [];
-    for (let i = 0; i < param_value.length; i++) {
-      let s = param_value[i];
-      // check for unparsed JSON. In case some is detected the new strings are appended and this iteration is skipped
-      let jsonCheck = correctUnparsedJSON(s);
-      if (jsonCheck.length > 0) {
-        valueArray.push(...jsonCheck);
-        continue;
-      }
-      else{
-        valueArray.push(s);
-      }
-    }
+    let valueArray = tidyJSON(param_value);
 
     // distribute parameters to elements
     (valueArray).forEach(parameter =>{
@@ -162,15 +150,7 @@ function normalizeConfig(human_readable_config, pipeline_structure) {
         parameter = splitted_param_value[splitted_param_value.length -1];
       }
 
-      let outputObject = {type: "value"};
-      // add all values
-      let splitPair = parameter.split("=", 2);
-      if (splitPair.length == 1) { // Handle standalone values
-        splitPair[1] = "-"
-      }
-      outputObject["name"] = splitPair[0].trim();
-      let rawValue = splitPair[1].trim();
-      outputObject["value"] = (!isNaN(parseFloat(rawValue)) && !Number.isInteger(rawValue)) ? parseFloat(rawValue) : rawValue; // parse
+      let outputObject = {...parseParameter(parameter), ...{type: "value"}};
       param_obj.value.push(outputObject)
     })
   }
@@ -263,33 +243,98 @@ function correctUnparsedJSON(s) {
 }
 
 /**
- * This function formats any normalised config into a string.
- * @param {Object} config Expects normalised config (initially provided by {@link normalizeConfig}).
- * @return {String} String representation of given config (contains html tags).
+ * This function checks an object for half-parsed json.
+ * @param {Array} param_value Expects photonai human-readable-config param_values
+ * @return {Array} tidies param values
  */
-function formatHRC(config) {
-  // handle parents
-  if (config.type === "parent") {
-    let childrenStrings = [];   // recursively process all children in value array
-
-    for (const child of config.value) {
-      childrenStrings.push(formatHRC(child));
-    }
-
-    // omit config.name if element is root
-    if (config.name === ":root")
-      return childrenStrings.filter(el => el!="").join(", ");
-    
-    if (childrenStrings.length > 0){
-      return `<b>${config.name}.</b> [${childrenStrings.filter(el => el!="").join(", ")}]`;
+function tidyJSON(param_value){
+  let valueArray = [];
+  for (let i = 0; i < param_value.length; i++) {
+    let s = param_value[i];
+    // check for unparsed JSON. In case some is detected the new strings are appended and this iteration is skipped
+    let jsonCheck = correctUnparsedJSON(s);
+    if (jsonCheck.length > 0) {
+      valueArray.push(...jsonCheck);
+      continue;
     }
     else{
-      return '';
+      valueArray.push(s);
     }
   }
+  return valueArray
+}
 
-  // exit recursion on value type
-  return `${config.name}=${config.value}`;
+/**
+ * This function parses a paramter = value string.
+ * @param {String} parameter Expects something like "SVC=1.23823"
+ * @return {Object} Returns name and correctly parsed value of parameter
+ */
+function parseParameter(parameter){
+  let outputObject = Object();
+  let splitPair = parameter.split("=", 2);
+  if (splitPair.length == 1) { // Handle standalone values
+    splitPair[1] = "";
+  }
+  outputObject["name"] = splitPair[0].trim();
+  let rawValue = splitPair[1].trim();
+  let value_to_set = rawValue;
+  let parsed_value = parseFloat(rawValue);
+  if (!isNaN(parsed_value) && !Number.isInteger(rawValue)){
+    value_to_set = Math.round((parsed_value + Number.EPSILON) * 10000) / 10000;
+  }
+  outputObject["value"] = value_to_set
+  return outputObject;
+}
+
+
+/**
+ * This function formats any normalised config into a string.
+ * @param {Object} config Expects normalised config (initially provided by {@link normalizeConfig}).
+ * @param {String} element_name Expects namespace of element to identify it in the pipeline.
+ * @return {String} String representation of given config (contains html tags).
+ */
+function formatHRC(config){
+
+  let outputArray = {};
+  for (let [param_key, param_value] of Object.entries(config)) {
+
+    let namespace_praefix = param_key.replace("__", ".");
+    let valueArray = tidyJSON(param_value);
+
+    // distribute parameters to elements
+    (valueArray).forEach(parameter =>{
+
+      let splitted_param_value = parameter.split("__");
+      parameter = parseParameter(splitted_param_value.pop());
+      let namespace_postfix = splitted_param_value.join(".");
+
+      // add all values
+      let parameter_object_key = [namespace_praefix, namespace_postfix].join(".");
+      if (parameter_object_key.endsWith(".")) parameter_object_key = parameter_object_key.slice(0, -1);
+      if (!(parameter_object_key in outputArray)){
+        outputArray[parameter_object_key] = [parameter]
+      }
+      else{
+        outputArray[parameter_object_key].push(parameter)
+      }
+    })
+  }
+
+  let html_output = [];
+  for (let [namespace, parameters] of Object.entries(outputArray)) {
+    let output_string = "";
+    let parameter_strings = parameters.map(param_obj =>
+      `<b>${param_obj["name"]}</b>=<i>${param_obj["value"]}</i>`);
+    if (parameter_strings.length > 1){
+      output_string = `${namespace}: ${parameter_strings.join(", ")}`;
+    }
+    else{
+      output_string = `${namespace}: ${parameter_strings[0]}`;
+    }
+
+    html_output.push(output_string);
+  }
+  return html_output.join("<br>")
 }
 
 /**

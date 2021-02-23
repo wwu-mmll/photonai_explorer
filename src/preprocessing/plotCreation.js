@@ -775,6 +775,10 @@ function plotBestConfigConfusion(file) {
 
       plotTraining.data.push(traceTrueTraining);
       plotValidation.data.push(traceTrueValidation);
+      plotTraining.layout.xaxis = {title: 'Predicted value'};
+      plotTraining.layout.yaxis = {title: 'True value'};
+      plotValidation.layout.xaxis = {title: 'Predicted value'};
+      plotValidation.layout.yaxis = {title: 'True value'};
     }
 
 

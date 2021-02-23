@@ -7,12 +7,14 @@
           <span class="photon-elements-praefix">{{ configDict.class}}</span>:{{configDict.name}}
         </p>
         <p v-else class="configItemHeader" >{{configDict.name}}</p>
-        <div class="simpleContent" v-for="(child, index) in simpleChildren" :key="index">
-          <div>
-            <div class="col m8 simpleContentKey truncate"><p>{{child.name}}</p></div>
-            <div class="col m4 simpleContentValue truncate"><p>{{croppedValue(child.value)}}</p></div>
-          </div>
-        </div>
+        <table class="best-config-table">
+          <tr class="simpleContent" v-for="(child, index) in simpleChildren" :key="index">
+              <td class="simpleContentKey">{{child.name}}</td>
+              <td class="simpleContentValue">
+                <span style="margin-left: 10px;" class="truncate">{{child.value}}</span>
+              </td>
+          </tr>
+        </table>
         <div class="complexWrapper">
           <BestConfigElement v-for="(child, index) in complexChildren" :key="index"
                              :config-dict="child" :depth="depth + 1"
@@ -117,7 +119,6 @@ export default {
     padding: 5px 15px 5px 15px;
     text-decoration: line-through;
   }
-
   .configItemHeader {
     font-weight: bold;
     margin: 5px 0px 5px 0px;
@@ -134,22 +135,22 @@ export default {
     margin-right: 5px;
   }
 
-  .simpleContent {
-    text-align: left;
-    min-height: 25px;
-    /*padding: 5px 0px;*/
-  }
-  .simpleContent p{
+  .best-config-table, .best-config-table tr{
     margin: 0px;
+    padding: 0px;
+    border: none;
+  }
+  .best-config-table td{
+    padding: 0px;
   }
   .simpleContentKey{
     font-style: italic;
-    text-align: right;
-  }
-  .simpleContentValue p{
-    margin-left: 10px;
+    text-align: left;
     font-size: 0.85rem;
-    padding-top: 3px;
+  }
+  .simpleContentValue{
+    text-align: right;
+    font-size: 0.85rem;
   }
 
   hr {

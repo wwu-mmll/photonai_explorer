@@ -1,8 +1,12 @@
 <template>
-  <div class="col s12">
-    <div class="testedConfigTable row" style="margin-bottom: 0px">
-      <h2 class="col s12 m6 left-align">Tested Configurations</h2>
-      <div class="col s6 offset-m2 m4 searchBox">
+  <div class="row">
+    <div class="testedConfigTable" style="margin-bottom: 0px">
+      <div class="col s12 m6 left-align">
+        <h2 >Tested Configurations</h2>
+        <p class="description">Explore and filter all tested hyperparameter configurations. <br>
+          You can sort the entries ascending and descending by clicking on a metric name.</p>
+      </div>
+      <div class="col s6 offset-m1 m5 searchBox">
         <h2>Search:</h2>
         <div class="input-field">
           <input autocomplete="off" id="autocomplete-input" v-model.lazy="currentSearchTerm" v-model="currentSearchTerm"
@@ -11,57 +15,59 @@
       </div>
     </div>
 
-    <p v-if="metricCount !== metricNames.length" style="color: var(--photon-explorer-dark-pink)">
-      Warning: Due to size restrictions this table is only showing {{ metricNames.length }} of {{
-      metricCount }} supplied metrics!
-    </p>
+    <div class="row" style="margin-left: 15px;">
 
-    <table class="responsive-table">
-      <thead>
-      <tr>
-        <th @click="sortTable('foldID')">
-          Fold#
-        </th>
-        <th @click="sortTable('configID')">
-          Config#
-        </th>
-        <th @click="sortTable('configString')">
-          Config
-        </th>
-        <th @click="sortTable(metricName)" v-for="(metricName, index) in metricNames" :key="index">
-          {{ metricName }}
-        </th>
-      </tr>
-      </thead>
+        <p v-if="metricCount !== metricNames.length" style="color: var(--photon-explorer-dark-pink)">
+          Warning: Due to size restrictions this table is only showing {{ metricNames.length }} of {{
+          metricCount }} supplied metrics!
+        </p>
 
-      <tbody>
-      <tr v-for="(row, rowIndex) in getSortedTable()" :key="rowIndex">
-        <td v-for="(value, name, index) in row" :key="index">
-          <span v-if="name !== 'tctMetadata'" v-html="formatTableCell(value)"></span>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+        <table class="responsive-table">
+          <thead>
+          <tr>
+            <th @click="sortTable('foldID')">
+              Fold#
+            </th>
+            <th @click="sortTable('configID')">
+              Config#
+            </th>
+            <th @click="sortTable('configString')">
+              Config
+            </th>
+            <th @click="sortTable(metricName)" v-for="(metricName, index) in metricNames" :key="index">
+              {{ metricName }}
+            </th>
+          </tr>
+          </thead>
 
-    <div class="tableControllers">
-      <a class="btn tooltipped" data-position="bottom" data-tooltip="Min (5)"
-         @click="alterRowCount(Number.MIN_SAFE_INTEGER)">
-        <i class="material-icons">fast_rewind</i>
-      </a>
-      <a class="btn tooltipped" data-position="bottom" data-tooltip="Less (5)" @click="alterRowCount(-5)">
-        <i class="material-icons">arrow_upward</i>
-      </a>
-      <a class="btn tooltipped" data-position="bottom" data-tooltip="More (5)" @click="alterRowCount(5)">
-        <i class="material-icons">arrow_downward</i>
-      </a>
-      <a class="btn tooltipped" data-position="bottom" :data-tooltip="'Max (' + rowsShown.maxCount + ')'"
-         @click="alterRowCount(Number.MAX_SAFE_INTEGER)">
-        <i class="material-icons">fast_forward</i>
-      </a>
+          <tbody>
+          <tr v-for="(row, rowIndex) in getSortedTable()" :key="rowIndex">
+            <td v-for="(value, name, index) in row" :key="index">
+              <span v-if="name !== 'tctMetadata'" v-html="formatTableCell(value)"></span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+
+        <div class="tableControllers">
+          <a class="btn tooltipped" data-position="bottom" data-tooltip="Min (5)"
+             @click="alterRowCount(Number.MIN_SAFE_INTEGER)">
+            <i class="material-icons">fast_rewind</i>
+          </a>
+          <a class="btn tooltipped" data-position="bottom" data-tooltip="Less (5)" @click="alterRowCount(-5)">
+            <i class="material-icons">arrow_upward</i>
+          </a>
+          <a class="btn tooltipped" data-position="bottom" data-tooltip="More (5)" @click="alterRowCount(5)">
+            <i class="material-icons">arrow_downward</i>
+          </a>
+          <a class="btn tooltipped" data-position="bottom" :data-tooltip="'Max (' + rowsShown.maxCount + ')'"
+             @click="alterRowCount(Number.MAX_SAFE_INTEGER)">
+            <i class="material-icons">fast_forward</i>
+          </a>
+        </div>
+
     </div>
-
   </div>
-
 
 </template>
 
@@ -258,7 +264,7 @@
         fold.tested_config_list.forEach(config => { // iterate configs
           let configID = config.config_nr;
           let normalisedConfig = normalizeConfig(config.human_readable_config, this.hyperpipeInfo.elements);
-          let configString = formatHRC(normalisedConfig);
+          let configString = formatHRC(config.human_readable_config);
           let metrics = this.extractMeanMetrics(config.metrics_test)
 
           let row = { // Order: Fold#, Config#, Config string, Metrics as returned by computed#metricNames
@@ -324,5 +330,8 @@
   }
   .configTable table{
     color: var(--photon-dark);
+  }
+  .text-align-right{
+    text-align: center;
   }
 </style>

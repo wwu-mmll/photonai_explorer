@@ -92,7 +92,7 @@ h1{
 h2{
   text-transform: uppercase;
   font-size: 1.5rem;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 h3{
   color: var(--photon-light-blue);

@@ -1,40 +1,37 @@
 <template>
   <div class="viz">
     <div class="vizHeader row">
-      <div class="col s12">
-        <h1>{{ pipeName }}</h1>
-        <div class="analysis_info">
-          <p>
-            Computation finished {{new Date(this.file.computation_end_time["$date"]).toLocaleString()}} after ~
-            {{Math.ceil(Math.abs(
-              new Date(this.file.computation_end_time["$date"]).getTime() -
-              new Date(this.file.computation_start_time["$date"]).getTime()) / 1000 / 60)}} minutes
-            with {{this.file.hyperpipe_info.data.X_shape[0]}} samples
-            and {{this.file.hyperpipe_info.data.X_shape[1]}} features.
-          </p>
+      <h1>{{ pipeName }}</h1>
+      <div class="analysis_info">
+        <p>
+          Computation finished {{new Date(this.file.computation_end_time["$date"]).toLocaleString()}} after ~
+          {{Math.ceil(Math.abs(
+            new Date(this.file.computation_end_time["$date"]).getTime() -
+            new Date(this.file.computation_start_time["$date"]).getTime()) / 1000 / 60)}} minutes
+          with {{this.file.hyperpipe_info.data.X_shape[0]}} samples
+          and {{this.file.hyperpipe_info.data.X_shape[1]}} features.
+        </p>
 <!--          <p><b>Outer Fold Split:</b> {{ file.hyperpipe_info.cross_validation.OuterCV }}</p>-->
 <!--          <p><b>Inner Fold Split:</b> {{ file.hyperpipe_info.cross_validation.InnerCV }}</p>-->
-        </div>
       </div>
     </div>
 
 
     <div class="row">
-      <div class="col m12 s12">
         <h2>Best Hyperparameter configuration</h2>
-        <p>The best hyperparameter configuration was chosen by
+        <p class="description"> The best hyperparameter configuration was chosen by
           {{this.file.hyperpipe_info.maximize_best_config_metric ? "maximizing": "minimizing"}}
           {{this.file.hyperpipe_info.best_config_metric}}.</p>
         <BestConfigDiagram :config-dict="file.best_config.human_readable_config"
                            :pipeline-structure="file.hyperpipe_info.elements"></BestConfigDiagram>
-      </div>
     </div>
 
 
-    <div class="row">
+    <div class="row" style="margin-top: 100px;">
         <h2>Performance</h2>
         <p class="description">Here you see the performance mean of the best hyperparameter configuration of
-          all outer folds, respectively. For comparison, the baseline dummy performance is outlined in black.</p>
+          all outer folds, respectively. <br>
+          For comparison, the baseline dummy performance is outlined in black.</p>
         <PerformancePlots :file="file"></PerformancePlots>
     </div>
 
@@ -56,7 +53,7 @@
 
     </div>
 
-    <div class="row">
+    <div class="row" style="margin-top: 100px;">
       <div class="col m8 s12">
         <h2 v-if="file.hyperpipe_info.estimation_type=='classifier'">Confusion matrix</h2>
         <h2 v-else>Predictions</h2>

@@ -26,10 +26,10 @@ export default {
   },
   methods: {
     load_demo_file(){
-      this.files.push(require("../../assets/demo/regression.json"));
       this.files.push(require("../../assets/demo/ensemble.json"));
-      this.files.push(require("../../assets/demo/compare_estimators.json"));
       this.files.push(require("../../assets/demo/branches.json"));
+      this.files.push(require("../../assets/demo/compare_estimators.json"));
+      this.files.push(require("../../assets/demo/regression.json"));
       this.updateCallback();
     },
     readJsonAndPush(f){
