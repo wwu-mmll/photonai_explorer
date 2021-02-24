@@ -103,6 +103,14 @@
        */
       extractMeanMetrics(metricList) {
         let rMetrics = {};
+        // let metricListordered = Object.keys(metricList).sort().reduce(
+        //     (obj, key) => {
+        //       obj[key] = metricList[key];
+        //       return obj;
+        //     },
+        //     {}
+        // )
+        let sortedMetricList = metricList.map(metric => metric.metric_name).sort();
         metricList.forEach(metric => {
           if (metric.operation.endsWith("mean") && this.metricNames.includes(metric.metric_name))
             rMetrics[metric.metric_name] = metric.value
@@ -131,7 +139,8 @@
 
         if (this.normalisedSearchTerm.startsWith("$")) {
           // adv search
-          let evalQuery = replaceAll(this.currentSearchTerm, "\\$", "this.") // dont use normalised searach term bc some attributes are case sensitive
+          let evalQuery = replaceAll(this.currentSearchTerm, "\\$", "this.")
+          // dont use normalised searach term bc some attributes are case sensitive
 
           filter = row => {
             let rowCopy = Object.assign({}, row); // create working copy to not mess with table creation
@@ -234,7 +243,7 @@
        */
       metricNames() {
         let metricObject = this.hyperpipeInfo.metrics;
-        return metricObject.sort().slice(0, this.maxAllowedMetrics);
+        return metricObject.slice(0, this.maxAllowedMetrics);
       },
       /**
        * Returns number of metrics used in analysis

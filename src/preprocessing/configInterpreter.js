@@ -264,6 +264,11 @@ function tidyJSON(param_value){
   return valueArray
 }
 
+Number.prototype.countDecimals = function () {
+  if(Math.floor(this.valueOf()) === this.valueOf()) return 0;
+  return this.toString().split(".")[1].length || 0;
+}
+
 /**
  * This function parses a paramter = value string.
  * @param {String} parameter Expects something like "SVC=1.23823"
@@ -278,10 +283,22 @@ function parseParameter(parameter){
   outputObject["name"] = splitPair[0].trim();
   let rawValue = splitPair[1].trim();
   let value_to_set = rawValue;
-  let parsed_value = parseFloat(rawValue);
-  if (!isNaN(parsed_value) && !Number.isInteger(rawValue)){
-    value_to_set = Math.round((parsed_value + Number.EPSILON) * 10000) / 10000;
+  if (Number.isInteger(rawValue)){
+    value_to_set = parseInt(rawValue);
   }
+  else{
+    let parsed_value = parseFloat(rawValue);
+
+    if (!isNaN(parsed_value) && !Number.isInteger(rawValue)) {
+      if (parsed_value.countDecimals() > 4) {
+        value_to_set = parsed_value.toFixed(4);
+      } else {
+        value_to_set = parsed_value;
+      }
+    }
+  }
+
+
   outputObject["value"] = value_to_set
   return outputObject;
 }
@@ -362,5 +379,4 @@ function getAttributesInternal(config, result) {
   } else {
     result[config.name] = config.value;
   }
-
 }
