@@ -1,5 +1,5 @@
 # PHOTONAI Explorer
-[![Build Status Travis](https://img.shields.io/travis/com/wwu-mmll/photonai_explorer/master)](https://travis-ci.com/github/wwu-mmll/photonai_explorer/branches)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/wwu-mmll/photonai_explorer/Node.js%20build%20and%20lint/master)](https://github.com/wwu-mmll/photonai_explorer/actions)
 [![License: AGPLv3](https://img.shields.io/github/license/wwu-mmll/photonai_explorer)](https://github.com/wwu-mmll/photonai_explorer/blob/master/LICENSE)
 [![GitHub Release](https://img.shields.io/github/release-date/wwu-mmll/photonai_explorer)](https://github.com/wwu-mmll/photonai_explorer/releases)
 [![Twitter Follow](https://img.shields.io/twitter/follow/wwu_mmll?style=social)](https://twitter.com/intent/follow?screen_name=wwu_mmll)
