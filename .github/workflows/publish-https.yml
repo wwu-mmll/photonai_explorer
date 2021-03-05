@@ -1,4 +1,4 @@
-name: Nodejs publish online @ explorer.photon-ai.com
+name: Node.js publish online @ explorer.photon-ai.com
 
 on:
   release:
