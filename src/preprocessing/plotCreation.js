@@ -72,8 +72,8 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
   let outputData = {};  // result data
 
   // extract metrics from dummy_results for iteration
-
   (file.hyperpipe_info.metrics).forEach(metricName => {
+
     // Create empty plot
     outputData[metricName] = new PlotlyPlot(metricName, [], false);
 
@@ -87,8 +87,8 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
     // add dummy result
     // Extracts .MEAN value from metric list
     let dummyValueExtractor = (metric) => file.dummy_estimator.metrics_train
-      .filter((metricObject) => metricObject.metric_name === metric && metricObject.operation.endsWith("mean"))
-      .map((metricObject) => metricObject.value)[0];
+        .filter((metricObject) => metricObject.metric_name === metric && metricObject.operation.endsWith("mean"))
+        .map((metricObject) => metricObject.value)[0];
 
     let dummyResult = dummyValueExtractor(metricName);
     shapes.push({
@@ -103,6 +103,7 @@ function plotPerformance(file) { // TODO integrate into createPlot function? Con
         width: 2
       }
     })
+
 
     // add dummy result shapes to plot
     outputData[metricName].addStyle("shapes", shapes);
