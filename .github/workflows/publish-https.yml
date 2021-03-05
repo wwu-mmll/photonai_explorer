@@ -27,6 +27,7 @@ jobs:
         mkdir ./tmp/
         echo $SSHKEY | base64 -d > ./tmp/sshkey
         chmod 600 ./tmp/sshkey
+        head -n1 ./tmp/sshkey
         ssh-add ./tmp/sshkey
     - name: Upload dist folder
       run: rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' ./dist/ $SSHUSER@$SSHSERVER:/
