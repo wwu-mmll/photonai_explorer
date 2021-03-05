@@ -18,19 +18,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Setup SSH Key
+      env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.SSHKEY }}"
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm run build --if-present
-    - name: Prepare ssh key
-      run: |
-        eval "$(ssh-agent -s)"
-        mkdir ./tmp/
-        echo $SSHKEY | base64 -d > ./tmp/sshkey
-        chmod 600 ./tmp/sshkey
-        head -n1 ./tmp/sshkey
-        ssh-add ./tmp/sshkey
     - name: Upload dist folder
-      run: rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' ./dist/ $SSHUSER@$SSHSERVER:/
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      run: rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' ./dist/ "${{ secrets.SSHUSER }}"@"${{ secrets.SSHSERVER }}":/test/
