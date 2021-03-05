@@ -33,4 +33,4 @@ jobs:
     - name: Upload dist folder
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: rsync -av -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' ./dist/ "${{ secrets.SSHUSER }}"@"${{ secrets.SSHSERVER }}":/test/
+      run: rsync -av --delete -e 'ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR' ./dist/ "${{ secrets.SSHUSER }}"@"${{ secrets.SSHSERVER }}":/
