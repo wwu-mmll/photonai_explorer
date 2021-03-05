@@ -1,8 +1,11 @@
 name: Nodejs publish online @ explorer.photon-ai.com
 
+# on:
+#   release:
+#     types: [published]
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ github-actions ]
 
 jobs:
   build_and_publish:
