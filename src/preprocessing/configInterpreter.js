@@ -129,9 +129,11 @@ function normalizeConfig(human_readable_config, pipeline_structure) {
   for (let [param_key, param_value] of Object.entries(human_readable_config)) {
 
     // find belonging element in pipeline
+    param_key = param_key.replace(" ", "");
     let curr_obj = pipeline_stub;
     let splitted_param_key = param_key.split("__");
     (splitted_param_key).forEach(name =>{
+      name = name.replace(" ", "");
       curr_obj = curr_obj.value.filter(obj => obj.name == name)[0]
     });
 
@@ -145,12 +147,17 @@ function normalizeConfig(human_readable_config, pipeline_structure) {
       let splitted_param_value = parameter.split("__");
       if (splitted_param_value.length > 1){
         for (let i = 0; i < splitted_param_value.length - 1; i++) {
-          param_obj = param_obj.value.filter(obj => obj.name == splitted_param_value[i])[0]
+          let search_name = splitted_param_value[i].replace(" ", "");
+          param_obj = param_obj.value.filter(obj => obj.name == search_name)[0];
         }
         parameter = splitted_param_value[splitted_param_value.length -1];
       }
 
       let outputObject = {...parseParameter(parameter), ...{type: "value"}};
+      if(!param_obj){
+        console.log("param_obj is None");
+        console.log(valueArray);
+      }
       param_obj.value.push(outputObject)
     })
   }
@@ -276,6 +283,7 @@ Number.prototype.countDecimals = function () {
  */
 function parseParameter(parameter){
   let outputObject = Object();
+  parameter.replace(" ", "");
   let splitPair = parameter.split("=", 2);
   if (splitPair.length == 1) { // Handle standalone values
     splitPair[1] = "";
