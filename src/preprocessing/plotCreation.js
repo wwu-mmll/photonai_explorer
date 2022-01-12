@@ -770,7 +770,7 @@ function plotBestConfigConfusion(file) {
       y_pred = fold.best_config.best_config_score.validation.y_pred;
 
       let traceTrueValidation = {name: "Fold " + idx, type: "scatter", mode: 'markers',
-        x: y_true, y: y_pred};
+        x: y_pred, y: y_true};
       // let tracePredictionValidation = {name: "Predicted", type: "scatter", mode: 'markers',
       //   x: range(y_pred.length), y: y_pred};
 
